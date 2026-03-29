@@ -2,6 +2,7 @@ package com.marketplace.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -19,11 +20,15 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/css/**", "/js/**", "/", "/error").permitAll()
+                .requestMatchers("/auth/**", "/api/auth/**", "/css/**", "/js/**", "/", "/error").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/orders/**").hasAnyRole("BUYER", "ADMIN")
+                .requestMatchers("/api/products/**").hasAnyRole("SELLER", "ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form.loginPage("/login").permitAll())
-                .logout(logout -> logout.logoutUrl("/auth/logout").permitAll());
+            .logout(logout -> logout.logoutUrl("/api/auth/logout").permitAll());
 
         return http.build();
     }
