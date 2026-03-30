@@ -21,7 +21,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -52,10 +53,12 @@ public class OrderServiceImpl implements OrderService {
         Order order = new Order();
         order.setBuyer(buyer);
         order.setStatus("PENDING");
-        order.setTotalPrice(0.0);
+        order.setTotalAmount(BigDecimal.ZERO);
+        order.setCreatedAt(Instant.now());
+        order.setUpdatedAt(Instant.now());
 
         // Process order items and validate stock
-        double totalPrice = 0.0;
+        BigDecimal totalAmount = BigDecimal.ZERO;
         List<OrderItem> orderItems = new java.util.ArrayList<>();
 
         for (OrderItemRequest itemRequest : orderRequest.getItems()) {
@@ -75,21 +78,21 @@ public class OrderServiceImpl implements OrderService {
             orderItem.setOrder(order);
             orderItem.setProduct(product);
             orderItem.setQuantity(itemRequest.getQuantity());
-            orderItem.setPricePerUnit(product.getPrice());
+            orderItem.setUnitPrice(new BigDecimal(product.getPrice().toString()));
 
-            double subtotal = product.getPrice() * itemRequest.getQuantity();
+            BigDecimal subtotal = orderItem.getUnitPrice().multiply(BigDecimal.valueOf(itemRequest.getQuantity()));
             orderItem.setSubtotal(subtotal);
 
             orderItems.add(orderItem);
-            totalPrice += subtotal;
+            totalAmount = totalAmount.add(subtotal);
 
             // Deduct stock
             product.setStock(product.getStock() - itemRequest.getQuantity());
             productRepository.save(product);
         }
 
-        // Set total price and save order
-        order.setTotalPrice(totalPrice);
+        // Set total amount and save order
+        order.setTotalAmount(totalAmount);
         Order savedOrder = orderRepository.save(order);
 
         // Save order items
@@ -114,10 +117,7 @@ public class OrderServiceImpl implements OrderService {
 
         // Map to response DTOs
         List<OrderResponse> responses = ordersPage.getContent().stream()
-                .map(order -> {
-                    List<OrderItem> items = orderItemRepository.findByOrder_Id(order.getId());
-                    return mapToOrderResponse(order, items);
-                })
+                .map(order -> mapToOrderResponse(order, order.getItems()))
                 .collect(Collectors.toList());
 
         return new PageImpl<>(responses, pageable, ordersPage.getTotalElements());
@@ -130,8 +130,8 @@ public class OrderServiceImpl implements OrderService {
                         item.getProduct().getId(),
                         item.getProduct().getProductName(),
                         item.getQuantity(),
-                        item.getPricePerUnit(),
-                        item.getSubtotal()
+                        item.getUnitPrice() != null ? item.getUnitPrice().doubleValue() : 0.0,
+                        item.getSubtotal() != null ? item.getSubtotal().doubleValue() : 0.0
                 ))
                 .collect(Collectors.toList());
 
@@ -139,10 +139,18 @@ public class OrderServiceImpl implements OrderService {
                 order.getId(),
                 order.getBuyer().getId(),
                 itemResponses,
-                order.getTotalPrice(),
+                order.getTotalAmount() != null ? order.getTotalAmount().doubleValue() : 0.0,
                 order.getStatus(),
-                order.getCreatedAt(),
-                order.getUpdatedAt()
+                instantToLocalDateTime(order.getCreatedAt()),
+                instantToLocalDateTime(order.getUpdatedAt())
         );
     }
+
+    private java.time.LocalDateTime instantToLocalDateTime(Instant instant) {
+        if (instant == null) {
+            return null;
+        }
+        return java.time.LocalDateTime.ofInstant(instant, java.time.ZoneId.systemDefault());
+    }
 }
+
