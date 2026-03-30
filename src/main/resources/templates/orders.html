@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - Mini Marketplace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            margin-left: 20px;
+        }
+
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #ecf0f1;
+            border-radius: 4px;
+        }
+
+        .nav-breadcrumb a {
+            color: #3498db;
+            text-decoration: none;
+            margin-right: 10px;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .empty-state h2 {
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            color: #95a5a6;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .orders-container {
+            display: grid;
+            gap: 20px;
+        }
+
+        .order-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: box-shadow 0.3s;
+        }
+
+        .order-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .order-id {
+            font-weight: bold;
+            font-size: 18px;
+            color: #2c3e50;
+        }
+
+        .order-date {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .order-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-shipped {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-delivered {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-cancelled {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .order-body {
+            padding: 20px;
+        }
+
+        .order-items {
+            margin-bottom: 20px;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .order-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-details {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 500;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .item-quantity {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        .item-price {
+            text-align: right;
+            margin-right: 10px;
+        }
+
+        .item-unit-price {
+            font-size: 14px;
+            color: #7f8c8d;
+            display: block;
+        }
+
+        .item-subtotal {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+
+        .order-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 2px solid #ecf0f1;
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .order-footer {
+            padding: 15px 20px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .order-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .pagination a, .pagination span {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #3498db;
+        }
+
+        .pagination a:hover {
+            background-color: #ecf0f1;
+        }
+
+        .pagination .active {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        .pagination .disabled {
+            color: #ccc;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 768px) {
+            .order-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .order-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .item-price {
+                margin-right: 0;
+                margin-top: 10px;
+                text-align: left;
+            }
+
+            .order-footer {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .order-total {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Mini Marketplace</h1>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="nav-breadcrumb">
+            <a href="/">Home</a> / <span>My Orders</span>
+        </div>
+
+        <div class="page-title">My Orders</div>
+
+        <!-- Empty State -->
+        <div th:if="${orders == null || orders.size() == 0}" class="empty-state">
+            <h2>No Orders Yet</h2>
+            <p>You haven't placed any orders yet. Start shopping now!</p>
+            <a href="/products" class="btn btn-primary">Browse Products</a>
+        </div>
+
+        <!-- Orders List -->
+        <div th:if="${orders != null && orders.size() > 0}" class="orders-container">
+            <div th:each="order : ${orders}" class="order-card">
+                <!-- Order Header -->
+                <div class="order-header">
+                    <div>
+                        <div class="order-id">Order #<span th:text="${order.id}"></span></div>
+                        <div class="order-date" th:text="${#temporals.format(order.createdAt, 'MMM dd, yyyy hh:mm a')}"></div>
+                    </div>
+                    <span th:class="'order-status status-' + ${order.status?.toLowerCase()}" 
+                          th:text="${order.status}"></span>
+                </div>
+
+                <!-- Order Body -->
+                <div class="order-body">
+                    <div class="order-items">
+                        <div th:each="item : ${order.items}" class="order-item">
+                            <div class="item-details">
+                                <div class="item-name" th:text="${item.productName}"></div>
+                                <div class="item-quantity">Quantity: <span th:text="${item.quantity}"></span></div>
+                            </div>
+                            <div class="item-price">
+                                <span class="item-unit-price">$<span th:text="${#numbers.formatDecimal(item.pricePerUnit, 1, 2)}"></span>/each</span>
+                                <div class="item-subtotal">$<span th:text="${#numbers.formatDecimal(item.subtotal, 1, 2)}"></span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="order-total">
+                        <span>Total Amount:</span>
+                        <span>$<span th:text="${#numbers.formatDecimal(order.totalPrice, 1, 2)}"></span></span>
+                    </div>
+                </div>
+
+                <!-- Order Footer -->
+                <div class="order-footer">
+                    <div>
+                        <small th:text="'Updated: ' + ${#temporals.format(order.updatedAt, 'MMM dd, yyyy hh:mm a')}"></small>
+                    </div>
+                    <div class="order-actions">
+                        <a th:href="'/api/orders/' + ${order.id}" class="btn btn-small btn-secondary">View Details</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination (if needed) -->
+        <div th:if="${totalPages != null && totalPages > 1}" class="pagination">
+            <a th:if="${currentPage > 0}" th:href="'/orders?page=' + ${currentPage - 1}">← Previous</a>
+            <span th:if="${currentPage == 0}" class="disabled">← Previous</span>
+
+            <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}" 
+                  th:class="${i == currentPage} ? 'active' : ''">
+                <a th:if="${i != currentPage}" th:href="'/orders?page=' + ${i}" th:text="${i + 1}"></a>
+                <span th:if="${i == currentPage}" th:text="${i + 1}"></span>
+            </span>
+
+            <a th:if="${currentPage < totalPages - 1}" th:href="'/orders?page=' + ${currentPage + 1}">Next →</a>
+            <span th:if="${currentPage == totalPages - 1}" class="disabled">Next →</span>
+        </div>
+    </div>
+</body>
+</html>

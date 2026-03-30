@@ -120,43 +120,150 @@ Response:
 ## 3) Orders
 
 ### POST /api/orders
-Place order (BUYER).
+Create/Place an order for the authenticated buyer.
+
+**Authentication:** Required (Bearer Token)  
+**Authorization:** BUYER, ADMIN roles only
 
 Request:
 ```json
 {
   "items": [
-    { "productId": 1, "quantity": 2 },
-    { "productId": 2, "quantity": 1 }
+    { 
+      "productId": 1, 
+      "quantity": 2 
+    },
+    { 
+      "productId": 3, 
+      "quantity": 1 
+    }
   ]
 }
 ```
 
-Response:
-- 201 Created
-- 400 Bad Request
-- 403 Forbidden
-- 409 Conflict (stock or state issue)
+Request Validation:
+- items: required, non-empty array, each item must have productId and quantity
+- productId: required, must exist
+- quantity: required, minimum 1
 
-### GET /api/orders/my
-Get logged-in buyer orders.
+Response (201 Created):
+```json
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "buyerId": 5,
+    "items": [
+      {
+        "id": 1,
+        "productId": 1,
+        "productName": "Laptop",
+        "quantity": 2,
+        "pricePerUnit": 999.99,
+        "subtotal": 1999.98
+      },
+      {
+        "id": 2,
+        "productId": 3,
+        "productName": "Mouse",
+        "quantity": 1,
+        "pricePerUnit": 29.99,
+        "subtotal": 29.99
+      }
+    ],
+    "totalPrice": 2029.97,
+    "status": "PENDING",
+    "createdAt": "2026-03-30T10:15:30",
+    "updatedAt": "2026-03-30T10:15:30"
+  },
+  "message": "Order created successfully"
+}
+```
 
-Response:
-- 200 OK
-- 403 Forbidden
+Error Responses:
+- 400 Bad Request: Invalid order data or validation error
+- 401 Unauthorized: Missing/invalid token
+- 403 Forbidden: User lacks required role (BUYER/ADMIN)
+- 404 Not Found: Product not found
+- 409 Conflict: Insufficient product stock
+  ```json
+  {
+    "success": false,
+    "error": "Insufficient stock for: Laptop. Available: 1, Requested: 5",
+    "timestamp": "2026-03-30T10:15:30"
+  }
+  ```
 
-### GET /api/orders/{id}
-Get order details.
+Implementation Notes:
+- Stock is automatically deducted from products upon successful order creation
+- All orders start with PENDING status
+- Order is atomic: all items processed together or none at all
+- Mappings: Order entity → OrderResponse DTO via OrderMapper
 
-Access:
-- BUYER: own order only
-- SELLER: order involving own products (if implemented)
-- ADMIN: all
+---
 
-Response:
-- 200 OK
-- 403 Forbidden
-- 404 Not Found
+### GET /api/orders/me
+Get all orders for the authenticated buyer with pagination.
+
+**Authentication:** Required (Bearer Token)  
+**Authorization:** BUYER, ADMIN roles only
+
+Query Parameters (optional):
+- page: Page number (0-indexed), default = 0
+- size: Number of results per page, default = 10
+
+Example Request:
+```
+GET /api/orders/me?page=0&size=10
+Authorization: Bearer <token>
+```
+
+Response (200 OK):
+```json
+{
+  "success": true,
+  "data": {
+    "content": [
+      {
+        "id": 1,
+        "buyerId": 5,
+        "items": [
+          {
+            "id": 1,
+            "productId": 1,
+            "productName": "Laptop",
+            "quantity": 2,
+            "pricePerUnit": 999.99,
+            "subtotal": 1999.98
+          }
+        ],
+        "totalPrice": 1999.98,
+        "status": "PENDING",
+        "createdAt": "2026-03-30T10:15:30",
+        "updatedAt": "2026-03-30T10:15:30"
+      }
+    ],
+    "pageable": {
+      "pageNumber": 0,
+      "pageSize": 10,
+      "totalElements": 2,
+      "totalPages": 1
+    }
+  },
+  "message": "Orders retrieved successfully"
+}
+```
+
+Error Responses:
+- 401 Unauthorized: Missing/invalid token
+- 403 Forbidden: User lacks required role
+- 404 Not Found: Buyer not found
+
+Implementation Notes:
+- Returns only orders for authenticated buyer
+- ADMIN role can retrieve any buyer's orders (future enhancement)
+- Results include nested order items with product details
+- Pagination reduces payload size for large order histories
 
 ## 4) Admin
 

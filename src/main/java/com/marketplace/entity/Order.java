@@ -37,6 +37,9 @@ public class Order {
     @Column(nullable = false)
     private Instant createdAt;
 
+    @Column(nullable = false)
+    private Instant updatedAt;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items = new ArrayList<>();
 
@@ -78,6 +81,14 @@ public class Order {
 
     public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Instant updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public List<OrderItem> getItems() {

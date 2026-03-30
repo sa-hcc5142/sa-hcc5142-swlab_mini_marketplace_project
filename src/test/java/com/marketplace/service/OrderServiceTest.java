@@ -26,7 +26,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -61,7 +60,6 @@ class OrderServiceTest {
     void setUp() {
         testBuyer = new User();
         testBuyer.setId(1L);
-        testBuyer.setUsername("buyer1");
         testBuyer.setEmail("buyer@example.com");
 
         testProduct = new Product();
@@ -74,9 +72,9 @@ class OrderServiceTest {
         testOrder.setId(1L);
         testOrder.setBuyer(testBuyer);
         testOrder.setStatus("PENDING");
-        testOrder.setTotalPrice(100.0);
-        testOrder.setCreatedAt(LocalDateTime.now());
-        testOrder.setUpdatedAt(LocalDateTime.now());
+        testOrder.setTotalAmount(new java.math.BigDecimal("100.0"));
+        testOrder.setCreatedAt(java.time.Instant.now());
+        testOrder.setUpdatedAt(java.time.Instant.now());
     }
 
     @Test
@@ -155,8 +153,8 @@ class OrderServiceTest {
         orderItem1.setId(1L);
         orderItem1.setProduct(testProduct);
         orderItem1.setQuantity(2);
-        orderItem1.setPricePerUnit(50.0);
-        orderItem1.setSubtotal(100.0);
+        orderItem1.setUnitPrice(new java.math.BigDecimal("50.0"));
+        orderItem1.setSubtotal(new java.math.BigDecimal("100.0"));
 
         List<Order> orders = Arrays.asList(testOrder);
         Page<Order> ordersPage = new PageImpl<>(orders);
@@ -164,7 +162,6 @@ class OrderServiceTest {
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(testBuyer));
         when(orderRepository.findByBuyer_Id(1L, pageable)).thenReturn(ordersPage);
-        when(orderItemRepository.findByOrder_Id(1L)).thenReturn(Arrays.asList(orderItem1));
 
         // Act
         Page<OrderResponse> result = orderService.getBuyerOrders(1L, pageable);
@@ -179,7 +176,7 @@ class OrderServiceTest {
         // Verify repository calls
         verify(userRepository).findById(1L);
         verify(orderRepository).findByBuyer_Id(1L, pageable);
-        verify(orderItemRepository).findByOrder_Id(1L);
+        // Note: Items are accessed via order.getItems() relationship, not explicit repository call
     }
 
     @Test
