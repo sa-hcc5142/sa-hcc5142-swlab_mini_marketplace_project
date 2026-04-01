@@ -12,4 +12,8 @@ public class ResourceNotFoundException extends RuntimeException {
     public ResourceNotFoundException(String message, Throwable cause) {
         super(message, cause);
     }
+
+    public static ResourceNotFoundException notFound(String resource, Object identifier) {
+        return new ResourceNotFoundException(resource + " with identifier " + identifier + " not found");
+    }
 }
