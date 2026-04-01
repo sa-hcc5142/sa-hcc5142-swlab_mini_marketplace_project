@@ -65,6 +65,7 @@ class AdminServiceTest {
         adminUser.setFullName("Admin User");
         adminUser.setPassword("hashed_password");
         adminUser.setActive(true);
+        adminUser.setRole(adminRole);
 
         // Setup seller user
         sellerUser = new User();
@@ -74,6 +75,7 @@ class AdminServiceTest {
         sellerUser.setFullName("Seller User");
         sellerUser.setPassword("hashed_password");
         sellerUser.setActive(true);
+        sellerUser.setRole(sellerRole);
     }
 
     /**
