@@ -21,14 +21,15 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/auth/**", "/api/auth/**", "/css/**", "/js/**", "/", "/error").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/orders/**").hasAnyRole("BUYER", "ADMIN")
-                .requestMatchers("/api/products/**").hasAnyRole("SELLER", "ADMIN")
+                .requestMatchers("/actuator/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/products/**").permitAll()
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/orders/**").hasAnyRole("BUYER", "ADMIN")
+                .requestMatchers("/products/**").hasAnyRole("SELLER", "ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form.loginPage("/login").permitAll())
-            .logout(logout -> logout.logoutUrl("/api/auth/logout").permitAll());
+            .logout(logout -> logout.logoutUrl("/auth/logout").permitAll());
 
         return http.build();
     }
