@@ -22,8 +22,8 @@ WORKDIR /app
 # Copy built JAR from builder stage
 COPY --from=builder /app/target/mini-marketplace-0.0.1-SNAPSHOT.jar app.jar
 
-# Expose port 8080
-EXPOSE 8080
+# Expose port 10000 (configured in application.yml for docker profile)
+EXPOSE 10000
 
 # Health check will be handled by docker-compose service healthcheck
 
