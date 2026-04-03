@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database Service
+  postgres:
+    image: postgres:16-alpine
+    container_name: mini_marketplace_db
+    environment:
+      POSTGRES_USER: marketplace_user
+      POSTGRES_PASSWORD: secure_password_here
+      POSTGRES_DB: mini_marketplace
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - marketplace_network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U marketplace_user -d mini_marketplace" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+  # Mini Marketplace Application Service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mini_marketplace_app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/mini_marketplace
+      SPRING_DATASOURCE_USERNAME: marketplace_user
+      SPRING_DATASOURCE_PASSWORD: secure_password_here
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_PROFILES_ACTIVE: docker
+      SERVER_PORT: 8080
+    ports:
+      - "8888:8080"
+    networks:
+      - marketplace_network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/api/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  marketplace_network:
+    driver: bridge
