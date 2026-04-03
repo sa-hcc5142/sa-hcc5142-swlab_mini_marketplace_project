@@ -20,17 +20,17 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**", "/api/auth/**", "/css/**", "/js/**", "/", "/error").permitAll()
-                .requestMatchers("/actuator/**", "/api/actuator/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/products/**").hasAnyRole("SELLER", "ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/products/**").hasAnyRole("SELLER", "ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasAnyRole("SELLER", "ADMIN")
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/orders/**").hasAnyRole("BUYER", "ADMIN")
+                .requestMatchers("/auth/**", "/css/**", "/js/**", "/", "/error").permitAll()
+                .requestMatchers("/actuator/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/products/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/products/**").hasAnyRole("SELLER", "ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/products/**").hasAnyRole("SELLER", "ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/products/**").hasAnyRole("SELLER", "ADMIN")
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/orders/**").hasAnyRole("BUYER", "ADMIN")
                         .anyRequest().authenticated()
                 )
-                .formLogin(form -> form.loginPage("/login").permitAll())
+                .formLogin(form -> form.loginPage("/api/login").permitAll())
             .logout(logout -> logout.logoutUrl("/auth/logout").permitAll());
 
         return http.build();
