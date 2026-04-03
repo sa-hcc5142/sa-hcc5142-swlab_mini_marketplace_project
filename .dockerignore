@@ -1,0 +1,59 @@
+# Git files and folders
+.git
+.gitignore
+.gitattributes
+
+# Build and Maven files
+target/
+*.class
+*.jar
+.classpath
+.project
+.settings
+.m2
+
+# IDE and Editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+*.iml
+
+# Documentation files
+**/*.md
+*.md
+
+# Environment and config files (but not .env.example)
+.env
+.env.local
+
+# Node modules (if any)
+node_modules/
+npm-debug.log
+
+# OS specific files
+Thumbs.db
+.DS_Store
+
+# Build artifacts and temporary files
+*.log
+*temp*
+*.tmp
+
+# CI/CD and workflow files
+.github/workflows
+
+# Development documentation
+docs/
+docs/
+
+# Test coverage reports
+.jacoco/
+coverage/
+
+# Misc
+.editorconfig
+CONTRIBUTING.md
+CODE_OF_CONDUCT.md
