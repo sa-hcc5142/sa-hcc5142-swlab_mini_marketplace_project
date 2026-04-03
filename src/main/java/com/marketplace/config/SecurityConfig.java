@@ -30,8 +30,7 @@ public class SecurityConfig {
                 .requestMatchers("/orders/**").hasAnyRole("BUYER", "ADMIN")
                         .anyRequest().authenticated()
                 )
-                .formLogin(form -> form.loginPage("/api/login").permitAll())
-            .logout(logout -> logout.logoutUrl("/auth/logout").permitAll());
+                .logout(logout -> logout.logoutUrl("/auth/logout").permitAll());
 
         return http.build();
     }
