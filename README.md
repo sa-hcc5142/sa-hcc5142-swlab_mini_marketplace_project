@@ -148,6 +148,106 @@ Testing tools:
 - SpringBootTest
 - MockMvc
 
+## Docker Setup
+
+### Quick Start
+
+#### Prerequisites
+- Docker and Docker Compose installed
+- Ports 8888 and 5432 available on your machine
+
+#### Running with Docker
+
+```bash
+# Build and start services
+docker-compose up --build
+
+# In another terminal, verify health
+curl http://localhost:8888/api/actuator/health
+```
+
+#### Expected Startup
+- PostgreSQL: ~30-40 seconds to initialize
+- Spring Boot: ~20-30 seconds to start
+- **Total: ~1 minute to full readiness**
+
+### Access Application
+
+- **Web**: http://localhost:8888
+- **Health Check**: http://localhost:8888/api/actuator/health
+- **API Base**: http://localhost:8888/api
+
+### Configuration
+
+#### Environment Variables
+Copy `.env.example` to `.env` and customize as needed:
+
+```bash
+cp .env.example .env
+```
+
+Common variables:
+- `DB_URL`: PostgreSQL connection string
+- `DB_USERNAME`: Database user (default: marketplace_user)
+- `DB_PASSWORD`: Database password
+- `SPRING_PROFILES_ACTIVE`: Spring profile (docker)
+- `JAVA_TOOL_OPTIONS`: JVM memory settings (-Xmx512m -Xms256m)
+
+#### Spring Profiles
+- **default** (application.yml): Local development, PostgreSQL on localhost
+- **docker** (application-docker.yml): Docker Compose environment, PostgreSQL via 'postgres' hostname
+- **prod**: Production configuration (future)
+
+### Docker Files
+- `Dockerfile`: Multi-stage build (Maven compilation + JDK 21 runtime)
+- `docker-compose.yml`: PostgreSQL + Spring Boot service orchestration
+- `.dockerignore`: Build context optimization
+
+### Stopping Services
+
+```bash
+# Stop containers (keep data)
+docker-compose stop
+
+# Stop and remove containers
+docker-compose down
+
+# Stop, remove containers, and volumes
+docker-compose down -v
+```
+
+### Troubleshooting
+
+**Port conflicts:**
+```bash
+# Find process using port 8888
+netstat -ano | findstr :8888
+taskkill /PID <PID> /F
+```
+
+**View logs:**
+```bash
+docker-compose logs -f app        # Application logs
+docker-compose logs -f postgres   # Database logs
+```
+
+**Container health issues:**
+```bash
+docker ps                    # Check container status
+docker-compose restart       # Restart services
+docker system prune          # Clean up unused resources
+```
+
+For comprehensive Docker guidance, see [docs/docker-setup.md](docs/docker-setup.md)
+
+## Deployment
+
+### Render Deployment
+
+The application is configured for automatic deployment to [Render](https://render.com) via GitHub Actions CI/CD pipeline.
+
+Deployment URL: `https://mini-marketplace-prod.onrender.com` (when configured)
+
 Commands:
 
 ```bash
