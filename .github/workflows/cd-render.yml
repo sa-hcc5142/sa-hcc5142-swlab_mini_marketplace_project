@@ -23,23 +23,49 @@ jobs:
       run: mvn clean package -DskipTests
       timeout-minutes: 20
 
-    - name: Trigger Render deployment
+    - name: Trigger Render deployment (API)
       run: |
-        curl -X POST "https://api.render.com/deploy/srv-${{ secrets.RENDER_SERVICE_ID }}" \
+        set -euo pipefail
+
+        if [ -z "${{ secrets.RENDER_API_KEY }}" ]; then
+          echo "Missing required secret: RENDER_API_KEY"
+          exit 1
+        fi
+
+        if [ -z "${{ secrets.RENDER_SERVICE_ID }}" ]; then
+          echo "Missing required secret: RENDER_SERVICE_ID"
+          exit 1
+        fi
+
+        SERVICE_ID="${{ secrets.RENDER_SERVICE_ID }}"
+        if [[ "$SERVICE_ID" != srv-* ]]; then
+          SERVICE_ID="srv-$SERVICE_ID"
+        fi
+
+        DEPLOY_URL="https://api.render.com/v1/services/$SERVICE_ID/deploys"
+        echo "Triggering deployment for $SERVICE_ID"
+
+        RESPONSE=$(curl -fsS -X POST "$DEPLOY_URL" \
           -H "Accept: application/json" \
-          -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}"
+          -H "Content-Type: application/json" \
+          -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+          -d '{}')
+
+        echo "Render deployment API response received"
+        echo "$RESPONSE" | head -c 500
       env:
         RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
         RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
 
     - name: Wait for deployment
       run: |
-        echo "Deployment triggered to Render"
+        echo "Deployment triggered to Render via API"
         echo "Check https://dashboard.render.com for deployment status"
         echo "Service: mini-marketplace-prod"
 
     - name: Verify deployment health
       run: |
+        set -euo pipefail
         MAX_ATTEMPTS=10
         ATTEMPT=1
         while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
@@ -52,15 +78,19 @@ jobs:
           ATTEMPT=$((ATTEMPT + 1))
           sleep 30
         done
-        echo "⚠️ Application health check incomplete (may still be deploying)"
-        exit 0
+        echo "❌ Application health check failed after deployment"
+        exit 1
 
     - name: Deployment summary
       if: always()
       run: |
         echo "=== DEPLOYMENT SUMMARY ===" >> $GITHUB_STEP_SUMMARY
         echo "Service: mini-marketplace-prod" >> $GITHUB_STEP_SUMMARY
-        echo "Status: Deployment triggered to Render" >> $GITHUB_STEP_SUMMARY
+        echo "Status: Deployment triggered to Render via API" >> $GITHUB_STEP_SUMMARY
         echo "Live URL: https://mini-marketplace-prod.onrender.com" >> $GITHUB_STEP_SUMMARY
         echo "Health: https://mini-marketplace-prod.onrender.com/api/actuator/health" >> $GITHUB_STEP_SUMMARY
-        echo "Dashboard: https://dashboard.render.com/services/srv-${{ secrets.RENDER_SERVICE_ID }}" >> $GITHUB_STEP_SUMMARY
+        SERVICE_ID="${{ secrets.RENDER_SERVICE_ID }}"
+        if [[ "$SERVICE_ID" != srv-* ]]; then
+          SERVICE_ID="srv-$SERVICE_ID"
+        fi
+        echo "Dashboard: https://dashboard.render.com/services/$SERVICE_ID" >> $GITHUB_STEP_SUMMARY
