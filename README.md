@@ -215,7 +215,35 @@ mvn clean verify -Dmaven.javadoc.skip=true
 
 ## Docker
 
-Required command:
+- docs/test-report.md
+
+Auto-deploy repeatability proof #2: test commit for CI/CD validation.
+
+## Local Development Setup
+
+### 1) Clone
+
+```bash
+git clone https://github.com/sa-hcc5142/sa-hcc5142-swlab_mini_marketplace_project.git
+cd sa-hcc5142-swlab_mini_marketplace_project
+```
+
+### 2) Environment Variables
+
+Create local environment variables or use .env values for Docker:
+
+- DB_URL
+- DB_USERNAME
+- DB_PASSWORD
+- SERVER_PORT
+
+### 3) Run with Maven
+
+```bash
+mvn spring-boot:run
+```
+
+### 4) Run with Docker Compose
 
 ```bash
 docker compose up --build
