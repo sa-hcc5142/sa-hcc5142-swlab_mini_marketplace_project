@@ -258,6 +258,8 @@ Test evidence report file:
 
 - docs/test-report.md
 
+Auto-deploy repeatability proof #2: test commit for CI/CD validation.
+
 ## Local Development Setup
 
 ### 1) Clone
