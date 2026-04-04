@@ -1,4 +1,4 @@
-package com.marketplace.test.util;
+package com.marketplace.test.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.test.context.TestConfiguration;
