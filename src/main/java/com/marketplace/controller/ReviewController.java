@@ -20,7 +20,7 @@ import jakarta.validation.Valid;
  * Handles review creation, retrieval, updates, and deletion
  */
 @RestController
-@RequestMapping("/api/products/{productId}/reviews")
+@RequestMapping("/products/{productId}/reviews")
 public class ReviewController {
     
     private final ReviewService reviewService;

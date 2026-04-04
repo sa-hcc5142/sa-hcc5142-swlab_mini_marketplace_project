@@ -17,7 +17,7 @@ import jakarta.validation.Valid;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/products")
+@RequestMapping("/products")
 public class ProductController {
 
     private final ProductService productService;
