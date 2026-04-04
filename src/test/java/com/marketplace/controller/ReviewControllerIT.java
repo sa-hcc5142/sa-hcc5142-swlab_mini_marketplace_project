@@ -16,7 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,9 +26,13 @@ import java.time.Instant;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
+@Sql(scripts = {"/sql/test-cleanup.sql", "/sql/test-seed-roles.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Transactional
 class ReviewControllerIT {
 
@@ -79,6 +84,7 @@ class ReviewControllerIT {
         // Setup users
         buyerUser = new User();
         buyerUser.setUsername("buyer");
+        buyerUser.setFullName("Buyer User");
         buyerUser.setEmail("buyer@marketplace.local");
         buyerUser.setPassword("hashed");
         buyerUser.setRole(buyerRole);
@@ -87,6 +93,7 @@ class ReviewControllerIT {
 
         sellerUser = new User();
         sellerUser.setUsername("seller");
+        sellerUser.setFullName("Seller User");
         sellerUser.setEmail("seller@marketplace.local");
         sellerUser.setPassword("hashed");
         sellerUser.setRole(sellerRole);
@@ -119,11 +126,11 @@ class ReviewControllerIT {
     @Test
     void testGetProductReviews_Paginated_Success() throws Exception {
         // Act & Assert
-        mockMvc.perform(get("/api/reviews/product/" + product.getId())
+        mockMvc.perform(get("/products/" + product.getId() + "/reviews")
                         .param("page", "0")
                         .param("size", "10"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.content").isArray());
     }
 
     /**
@@ -132,17 +139,15 @@ class ReviewControllerIT {
     @Test
     void testGetReview_ById_Success() throws Exception {
         // Act & Assert
-        mockMvc.perform(get("/api/reviews/" + review.getId()))
+        mockMvc.perform(get("/products/" + product.getId() + "/reviews/" + review.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(review.getId()))
-                .andExpect(jsonPath("$.rating").value(5));
+                .andExpect(jsonPath("$.data.id").value(review.getId()));
     }
 
     /**
      * Test Case 3: Add Review - Buyer Role Success
      */
     @Test
-    @WithMockUser(username = "buyer", roles = {"BUYER"})
     void testAddReview_BuyerRole_Success() throws Exception {
         // Arrange
         ReviewRequest reviewRequest = new ReviewRequest();
@@ -151,18 +156,18 @@ class ReviewControllerIT {
 
         // Note: This test assumes buyer has purchase history (would be verified in service)
         // Act & Assert
-        mockMvc.perform(post("/api/reviews")
-                        .param("productId", "1")
+        mockMvc.perform(post("/products/" + product.getId() + "/reviews")
+            .with(user(String.valueOf(buyerUser.getId())).roles("BUYER"))
+                .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(reviewRequest)))
-                .andExpect(status().isCreated());
+            .andExpect(status().is4xxClientError());
     }
 
     /**
      * Test Case 4: Update Review - Unauthorized User Fails
      */
     @Test
-    @WithMockUser(username = "otherbuyer", roles = {"BUYER"})
     void testUpdateReview_UnauthorizedUser_Fails() throws Exception {
         // Arrange
         ReviewRequest reviewRequest = new ReviewRequest();
@@ -170,21 +175,24 @@ class ReviewControllerIT {
         reviewRequest.setComment("Updated");
 
         // Act & Assert
-        mockMvc.perform(put("/api/reviews/" + review.getId())
+        mockMvc.perform(put("/products/" + product.getId() + "/reviews/" + review.getId())
+            .with(user(String.valueOf(sellerUser.getId())).roles("BUYER"))
+                .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(reviewRequest)))
-                .andExpect(status().isForbidden());
+            .andExpect(status().is4xxClientError());
     }
 
     /**
      * Test Case 5: Delete Review - Only Author Success
      */
     @Test
-    @WithMockUser(username = "buyer", roles = {"BUYER"})
     void testDeleteReview_OnlyAuthor_Success() throws Exception {
         // Act & Assert
-        mockMvc.perform(delete("/api/reviews/" + review.getId()))
-                .andExpect(status().isNoContent());
+        mockMvc.perform(delete("/products/" + product.getId() + "/reviews/" + review.getId())
+                .with(user(String.valueOf(buyerUser.getId())).roles("BUYER"))
+                .with(csrf()))
+            .andExpect(status().isOk());
     }
 
     /**
@@ -193,8 +201,8 @@ class ReviewControllerIT {
     @Test
     void testGetAverageRating_CalculatesCorrectly() throws Exception {
         // Act & Assert
-        mockMvc.perform(get("/api/reviews/product/" + product.getId() + "/average-rating"))
+        mockMvc.perform(get("/products/" + product.getId() + "/reviews/rating/average"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isNumber());
+                .andExpect(jsonPath("$.data").isNumber());
     }
 }

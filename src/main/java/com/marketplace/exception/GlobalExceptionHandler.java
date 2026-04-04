@@ -1,6 +1,8 @@
 package com.marketplace.exception;
 
 import com.marketplace.dto.ApiResponse;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -81,6 +83,29 @@ public class GlobalExceptionHandler {
             UnauthorizedOperationException ex) {
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+        /**
+         * Handle Spring Security access denied errors from both filter-chain and method security.
+         * Returns 403 Forbidden.
+         */
+        @ExceptionHandler({AccessDeniedException.class, AuthorizationDeniedException.class})
+        public ResponseEntity<ApiResponse<Void>> handleAccessDenied(Exception ex) {
+                return ResponseEntity
+                                .status(HttpStatus.FORBIDDEN)
+                                .body(ApiResponse.error("Access denied"));
+        }
+
+    /**
+     * Handle invalid business operation errors.
+     * Returns 400 Bad Request.
+     */
+    @ExceptionHandler(InvalidOperationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidOperation(
+            InvalidOperationException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.error(ex.getMessage()));
     }
 

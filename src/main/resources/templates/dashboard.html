@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | Mini Marketplace</title>
+  <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<div th:replace="~{fragments/layout :: header('Dashboard')}"></div>
+
+<main class="container">
+  <section class="hero">
+    <h1>Mini Marketplace Dashboard</h1>
+    <p sec:authorize="isAuthenticated()">Signed in as <strong sec:authentication="name"></strong></p>
+    <p sec:authorize="isAnonymous()">Sign in to access role-specific dashboards.</p>
+  </section>
+
+  <section class="grid">
+    <article class="card">
+      <h3>Buyer Area</h3>
+      <p>Browse products, maintain cart, and view order history.</p>
+      <a class="btn btn-primary" th:href="@{/products/view}">Browse Products</a>
+    </article>
+
+    <article class="card" sec:authorize="hasAnyRole('SELLER','ADMIN')">
+      <h3>Seller Area</h3>
+      <p>Create and manage product catalog entries.</p>
+      <a class="btn btn-warning" th:href="@{/seller/dashboard}">Open Seller Dashboard</a>
+    </article>
+
+    <article class="card" sec:authorize="hasRole('ADMIN')">
+      <h3>Admin Area</h3>
+      <p>Manage users and roles with restricted controls.</p>
+      <a class="btn btn-ghost" th:href="@{/admin/dashboard}">Open Admin Dashboard</a>
+    </article>
+  </section>
+
+  <section class="card" sec:authorize="isAuthenticated()">
+    <h3>Security Snapshot</h3>
+    <p class="kv">Current principal: <span sec:authentication="name"></span></p>
+    <p class="kv">Authorities: <span sec:authentication="authorities"></span></p>
+  </section>
+</main>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+
+<script th:src="@{/js/config.js}"></script>
+<script th:src="@{/js/ui.js}"></script>
+</body>
+</html>

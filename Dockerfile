@@ -22,8 +22,8 @@ WORKDIR /app
 # Copy built JAR from builder stage
 COPY --from=builder /app/target/mini-marketplace-0.0.1-SNAPSHOT.jar app.jar
 
-# Expose port 10000 (configured in application.yml for docker profile)
-EXPOSE 10000
+# Expose Spring Boot runtime port used by docker-compose and application configs
+EXPOSE 8080
 
 # Health check will be handled by docker-compose service healthcheck
 

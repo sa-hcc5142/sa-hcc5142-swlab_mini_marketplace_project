@@ -15,7 +15,7 @@ import java.util.Map;
 @RestController
 public class RootController {
 
-    @GetMapping("/")
+    @GetMapping("/api-info")
     public ResponseEntity<ApiResponse<Map<String, Object>>> welcome() {
         Map<String, Object> data = new HashMap<>();
         data.put("application", "Mini Marketplace");

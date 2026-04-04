@@ -10,4 +10,6 @@ public interface AuthService {
 	AuthResponse login(LoginRequest request);
 
 	AuthResponse logout();
+
+	AuthResponse me(String identifier);
 }

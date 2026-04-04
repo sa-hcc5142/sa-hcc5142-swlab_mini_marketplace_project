@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cart | Mini Marketplace</title>
+  <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<div th:replace="~{fragments/layout :: header('Cart')}"></div>
+
+<main class="container">
+  <section sec:authorize="hasAnyRole('BUYER','ADMIN')">
+    <h2 class="section-title">My Cart</h2>
+    <p class="kv">Protected endpoint: <span class="mono">GET /api/cart/me</span></p>
+    <div class="notice">This page calls the live cart API.</div>
+    <pre id="cartOutput" class="mono">Loading...</pre>
+  </section>
+  <section class="card" sec:authorize="!hasAnyRole('BUYER','ADMIN')">
+    <h3>Cart Access Restricted</h3>
+    <p class="kv">Login as BUYER or ADMIN to use cart features.</p>
+  </section>
+</main>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+
+<script th:src="@{/js/config.js}"></script>
+<script th:src="@{/js/ui.js}"></script>
+<script th:src="@{/js/cart.js}"></script>
+</body>
+</html>

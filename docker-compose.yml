@@ -1,14 +1,12 @@
-version: '3.8'
-
 services:
   # PostgreSQL Database Service
   postgres:
     image: postgres:16-alpine
     container_name: mini_marketplace_db
     environment:
-      POSTGRES_USER: marketplace_user
-      POSTGRES_PASSWORD: secure_password_here
-      POSTGRES_DB: mini_marketplace
+      POSTGRES_USER: ${DB_USERNAME:-marketplace_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      POSTGRES_DB: ${DB_NAME:-mini_marketplace}
     ports:
       - "${DB_PORT:-5432}:5432"
     volumes:
@@ -16,7 +14,7 @@ services:
     networks:
       - marketplace_network
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U marketplace_user -d mini_marketplace" ]
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USERNAME:-marketplace_user} -d ${DB_NAME:-mini_marketplace}" ]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -33,9 +31,9 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/mini_marketplace
-      SPRING_DATASOURCE_USERNAME: marketplace_user
-      SPRING_DATASOURCE_PASSWORD: secure_password_here
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-mini_marketplace}
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME:-marketplace_user}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_PROFILES_ACTIVE: docker
       SERVER_PORT: 8080
