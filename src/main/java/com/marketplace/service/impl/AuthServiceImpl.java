@@ -7,6 +7,7 @@ import com.marketplace.entity.Role;
 import com.marketplace.entity.User;
 import com.marketplace.exception.InvalidCredentialsException;
 import com.marketplace.exception.ResourceAlreadyExistsException;
+import com.marketplace.exception.ResourceNotFoundException;
 import com.marketplace.repository.RoleRepository;
 import com.marketplace.repository.UserRepository;
 import com.marketplace.service.AuthService;
@@ -43,6 +44,7 @@ public class AuthServiceImpl implements AuthService {
         User user = new User();
         user.setFullName(request.fullName());
         user.setEmail(email);
+        user.setUsername(email);
         user.setPassword(passwordEncoder.encode(request.password()));
         user.setRoles(Collections.singleton(assignedRole));
 
@@ -66,6 +68,15 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponse logout() {
         return new AuthResponse("Logout successful", null, Collections.emptySet());
+    }
+
+    @Override
+    public AuthResponse me(String identifier) {
+        User user = userRepository.findByEmail(normalizeEmail(identifier))
+                .or(() -> userRepository.findByUsername(identifier))
+                .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
+
+        return new AuthResponse("Current user retrieved successfully", user.getEmail(), extractRoles(user));
     }
 
     private String normalizeEmail(String email) {

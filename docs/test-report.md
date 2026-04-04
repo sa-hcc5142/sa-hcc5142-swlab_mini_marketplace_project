@@ -1,84 +1,79 @@
-# Test Report - Mini Marketplace
+# Test Report
 
-## Test Objective
+This report summarizes automated test execution for the Mini Marketplace project.
 
-Validate core business logic, access control behavior, and API integration flow according to course requirements.
+## 1. Scope
 
-## Required Minimums
+- Unit tests: service and security components
+- Integration tests: REST API and Thymeleaf view routes
+- Deterministic SQL-seeded setup for integration tests
 
-- Unit tests (service layer): >= 15
-- Integration tests (controller layer): >= 3
-- All tests must pass in CI
-
-## Tooling
+## 2. Tooling
 
 - JUnit 5
 - Mockito
 - SpringBootTest
 - MockMvc
+- Spring Security Test
+- Maven Surefire and Failsafe
 
-## Planned Unit Test Coverage
-
-AuthService:
-- register success
-- register duplicate email rejection
-- password encryption on registration
-- login success
-- login invalid credentials
-
-ProductService:
-- create product success for seller
-- update own product success
-- update non-owner denied
-- delete own product success
-- list products pagination
-
-OrderService:
-- place order success
-- place order insufficient stock
-- calculate order total correctly
-- order retrieval for buyer
-- unauthorized order access denied
-
-AdminService:
-- list users for admin
-- role update success
-- deactivate user success
-
-## Planned Integration Test Coverage
-
-AuthControllerIT:
-- register endpoint success
-- login endpoint success/failure
-
-ProductControllerIT:
-- create endpoint forbidden for buyer
-- list endpoint success
-
-OrderControllerIT:
-- place order success
-- get my orders success
-
-AdminControllerIT:
-- admin users endpoint forbidden for non-admin
-
-## Execution Command
+## 3. Verification Command
 
 ```bash
-mvn clean test
+mvn clean verify -Dmaven.javadoc.skip=true
 ```
 
-## Evidence Table
+## 4. Latest Verified Results
 
-| Date | Branch | Total Unit | Total Integration | Result | Notes |
-|------|--------|------------|-------------------|--------|-------|
-| TBD  | TBD    | TBD        | TBD               | TBD    | TBD   |
+### Unit (Surefire)
 
-## CI Result Link
+- `CustomUserDetailsServiceTest`: 4
+- `AdminServiceTest`: 4
+- `AuthServiceTest`: 4
+- `CartServiceTest`: 6
+- `OrderServiceTest`: 5
+- `ProductAuthorizationServiceTest`: 9
+- `ProductServiceTest`: 8
+- `ReviewServiceTest`: 6
+- Unit total: 46, failures: 0, errors: 0
 
-- GitHub Actions run URL: TO_BE_ADDED
+### Integration (Failsafe)
 
-## Known Gaps
+- `AdminControllerIT`: 7
+- `AuthControllerIT`: 4
+- `CartControllerIT`: 4
+- `OrderControllerIT`: 2
+- `ProductControllerIT`: 7
+- `ReviewControllerIT`: 6
+- `ViewControllerIT`: 5
+- Integration total: 35, failures: 0, errors: 0
 
-- Populate actual test counts after Day 6 completion.
-- Add CI run URL after workflows are active.
+### Overall
+
+- Total tests: 81
+- Failures: 0
+- Errors: 0
+- Build: SUCCESS
+
+## 5. Method
+
+- `@SpringBootTest` and `@AutoConfigureMockMvc`
+- Security scenarios via `@WithMockUser` or authenticated mock principal
+- SQL scripts:
+  - `src/test/resources/sql/test-cleanup.sql`
+  - `src/test/resources/sql/test-seed-roles.sql`
+
+## 6. Rubric Compliance
+
+- Minimum unit tests (15): Achieved (46)
+- Minimum integration tests (3): Achieved (35)
+- CI integrated testing: Achieved
+
+## 7. Evidence Paths
+
+- Surefire reports: `target/surefire-reports/`
+- Failsafe reports: `target/failsafe-reports/`
+
+## 8. Conclusion
+
+Automated tests are stable and passing across unit and integration levels.

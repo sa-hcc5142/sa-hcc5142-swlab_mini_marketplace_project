@@ -1,12 +1,32 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini Marketplace - Login</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | Mini Marketplace</title>
+  <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
 <body>
-<h1>Login</h1>
-<p>Day 1 placeholder. Full auth UI will be completed in later days.</p>
+<div th:replace="~{fragments/layout :: header('Login')}"></div>
+
+<main class="container">
+  <h2 class="section-title">Login</h2>
+  <section class="card">
+    <form id="loginForm" class="form">
+      <input id="loginEmail" type="email" placeholder="Email" required>
+      <input id="loginPassword" type="password" placeholder="Password" required>
+      <button class="btn btn-primary" type="submit">Login</button>
+      <button id="logoutBtn" class="btn btn-ghost" type="button">Clear Local Session</button>
+    </form>
+  </section>
+  <div id="authNotice" class="notice">No local session yet.</div>
+  <pre id="authJson" class="mono"></pre>
+</main>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+
+<script th:src="@{/js/config.js}"></script>
+<script th:src="@{/js/ui.js}"></script>
+<script th:src="@{/js/login.js}"></script>
 </body>
 </html>

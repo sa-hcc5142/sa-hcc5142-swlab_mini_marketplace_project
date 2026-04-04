@@ -30,11 +30,10 @@ jobs:
           -DskipTests
       timeout-minutes: 15
 
-    - name: Run Maven tests
+    - name: Run Maven unit and integration tests
       run: |
-        mvn clean test \
-          -Dmaven.javadoc.skip=true \
-          -DskipITs
+        mvn clean verify \
+          -Dmaven.javadoc.skip=true
       timeout-minutes: 20
 
     - name: Generate test reports

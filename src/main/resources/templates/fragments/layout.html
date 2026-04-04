@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<div th:fragment="header(title)">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" th:href="@{/dashboard}">Mini Marketplace</a>
+      <nav class="nav">
+        <a th:href="@{/dashboard}">Dashboard</a>
+        <a th:href="@{/products/view}">Products</a>
+        <a th:href="@{/cart/view}" sec:authorize="hasAnyRole('BUYER','ADMIN')">Cart</a>
+        <a th:href="@{/orders/view}" sec:authorize="hasAnyRole('BUYER','ADMIN')">Orders</a>
+        <a th:href="@{/seller/dashboard}" sec:authorize="hasAnyRole('SELLER','ADMIN')">Seller</a>
+        <a th:href="@{/admin/dashboard}" sec:authorize="hasRole('ADMIN')">Admin</a>
+        <a th:href="@{/login}" sec:authorize="isAnonymous()">Login</a>
+        <a th:href="@{/register}" sec:authorize="isAnonymous()">Register</a>
+      </nav>
+    </div>
+  </header>
+</div>
+
+<div th:fragment="footer">
+  <footer class="container">
+    <section class="card">
+      <p class="kv">Software Engineering Lab Project • Full Stack Web Application with DevOps Pipeline</p>
+      <p class="kv">Theme: Mini Marketplace • Roles: ADMIN, SELLER, BUYER • Frontend: Thymeleaf</p>
+    </section>
+  </footer>
+</div>
+</body>
+</html>

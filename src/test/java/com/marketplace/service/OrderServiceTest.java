@@ -9,6 +9,7 @@ import com.marketplace.entity.Product;
 import com.marketplace.entity.User;
 import com.marketplace.exception.ResourceNotFoundException;
 import com.marketplace.exception.InvalidOperationException;
+import com.marketplace.mapper.OrderMapper;
 import com.marketplace.repository.OrderRepository;
 import com.marketplace.repository.OrderItemRepository;
 import com.marketplace.repository.ProductRepository;
@@ -49,6 +50,9 @@ class OrderServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private OrderMapper orderMapper;
+
     @InjectMocks
     private OrderServiceImpl orderService;
 
@@ -87,6 +91,15 @@ class OrderServiceTest {
         when(productRepository.findById(1L)).thenReturn(Optional.of(testProduct));
         when(orderRepository.save(any(Order.class))).thenReturn(testOrder);
         when(orderItemRepository.save(any(OrderItem.class))).thenReturn(new OrderItem());
+        when(orderMapper.toOrderResponse(any(Order.class))).thenReturn(new OrderResponse(
+            1L,
+            1L,
+            List.of(),
+            100.0,
+            "PENDING",
+            null,
+            null
+        ));
 
         // Act
         OrderResponse response = orderService.placeOrder(orderRequest, 1L);
@@ -162,6 +175,15 @@ class OrderServiceTest {
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(testBuyer));
         when(orderRepository.findByBuyer_Id(1L, pageable)).thenReturn(ordersPage);
+        when(orderMapper.toOrderResponse(any(Order.class))).thenReturn(new OrderResponse(
+            1L,
+            1L,
+            List.of(),
+            100.0,
+            "PENDING",
+            null,
+            null
+        ));
 
         // Act
         Page<OrderResponse> result = orderService.getBuyerOrders(1L, pageable);

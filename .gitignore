@@ -6,6 +6,9 @@
 *.iml
 /.vscode/
 
+# Environment variables (credentials)
+.env
+
 # OS files
 .DS_Store
 Thumbs.db

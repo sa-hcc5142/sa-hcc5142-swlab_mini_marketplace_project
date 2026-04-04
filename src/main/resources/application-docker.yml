@@ -5,7 +5,7 @@ spring:
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/mini_marketplace}
     username: ${SPRING_DATASOURCE_USERNAME:marketplace_user}
-    password: ${SPRING_DATASOURCE_PASSWORD:secure_password_here}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
     hikari:
       maximum-pool-size: 20
       minimum-idle: 5

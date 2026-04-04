@@ -12,16 +12,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
+@Sql(scripts = {"/sql/test-cleanup.sql", "/sql/test-seed-roles.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Transactional
 class ProductControllerIT {
 
@@ -45,6 +49,7 @@ class ProductControllerIT {
         // Create and save seller user
         seller = new User();
         seller.setUsername("seller1");
+        seller.setFullName("Seller One");
         seller.setEmail("seller1@example.com");
         seller.setPassword("password123");
         seller = userRepository.save(seller);
@@ -55,6 +60,7 @@ class ProductControllerIT {
         product.setDescription("A test product");
         product.setPrice(99.99);
         product.setStock(10);
+        product.setCategory("Electronics");
         product.setSeller(seller);
         product = productRepository.save(product);
     }
@@ -64,12 +70,12 @@ class ProductControllerIT {
      */
     @Test
     void testGetProductsEndpoint_PublicAccess_Success() throws Exception {
-        mockMvc.perform(get("/api/products")
+        mockMvc.perform(get("/products")
                 .param("page", "0")
                 .param("size", "10"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.content[0].productName").value("Test Product"));
+                .andExpect(jsonPath("$.data.content").isArray())
+                .andExpect(jsonPath("$.data.content[0].productName").value("Test Product"));
     }
 
     /**
@@ -77,17 +83,16 @@ class ProductControllerIT {
      */
     @Test
     void testGetProductByIdEndpoint_PublicAccess_Success() throws Exception {
-        mockMvc.perform(get("/api/products/" + product.getId()))
+        mockMvc.perform(get("/products/" + product.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.productName").value("Test Product"))
-                .andExpect(jsonPath("$.price").value(99.99));
+                .andExpect(jsonPath("$.data.productName").value("Test Product"))
+                .andExpect(jsonPath("$.data.price").value(99.99));
     }
 
     /**
      * Test Case 3: Create Product Endpoint - SELLER only
      */
     @Test
-    @WithMockUser(username = "seller1", roles = {"SELLER"})
     void testCreateProductEndpoint_SellerRole_Success() throws Exception {
         ProductRequest productRequest = new ProductRequest(
                 "New Product",
@@ -97,20 +102,20 @@ class ProductControllerIT {
                 "Electronics"
         );
 
-        mockMvc.perform(post("/api/products")
+        mockMvc.perform(post("/products")
+                .with(user(String.valueOf(seller.getId())).roles("SELLER"))
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(productRequest)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.productName").value("New Product"))
-                .andExpect(jsonPath("$.price").value(199.99));
+                .andExpect(jsonPath("$.data.productName").value("New Product"))
+                .andExpect(jsonPath("$.data.price").value(199.99));
     }
 
     /**
      * Test Case 4: Create Product Endpoint - BUYER unauthorized
      */
     @Test
-    @WithMockUser(username = "buyer1", roles = {"BUYER"})
     void testCreateProductEndpoint_BuyerRole_Unauthorized() throws Exception {
         ProductRequest productRequest = new ProductRequest(
                 "New Product",
@@ -120,7 +125,8 @@ class ProductControllerIT {
                 "Electronics"
         );
 
-        mockMvc.perform(post("/api/products")
+        mockMvc.perform(post("/products")
+                .with(user("buyer").roles("BUYER"))
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(productRequest)))
@@ -131,7 +137,6 @@ class ProductControllerIT {
      * Test Case 5: Update Product Endpoint - SELLER owner only
      */
     @Test
-    @WithMockUser(username = "seller1", roles = {"SELLER"})
     void testUpdateProductEndpoint_SellerOwner_Success() throws Exception {
         ProductRequest updateRequest = new ProductRequest(
                 "Updated Product",
@@ -141,23 +146,24 @@ class ProductControllerIT {
                 "Electronics"
         );
 
-        mockMvc.perform(put("/api/products/" + product.getId())
+        mockMvc.perform(put("/products/" + product.getId())
+                .with(user(String.valueOf(seller.getId())).roles("SELLER"))
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.productName").value("Updated Product"));
+                .andExpect(jsonPath("$.data.productName").value("Updated Product"));
     }
 
     /**
      * Test Case 6: Delete Product Endpoint - SELLER owner only
      */
     @Test
-    @WithMockUser(username = "seller1", roles = {"SELLER"})
     void testDeleteProductEndpoint_SellerOwner_Success() throws Exception {
-        mockMvc.perform(delete("/api/products/" + product.getId())
+        mockMvc.perform(delete("/products/" + product.getId())
+                                .with(user(String.valueOf(seller.getId())).roles("SELLER"))
                 .with(csrf()))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk());
     }
 
     /**
@@ -165,7 +171,7 @@ class ProductControllerIT {
      */
     @Test
     void testGetProductByIdEndpoint_NotFound() throws Exception {
-        mockMvc.perform(get("/api/products/999"))
+                mockMvc.perform(get("/products/999"))
                 .andExpect(status().isNotFound());
     }
 }

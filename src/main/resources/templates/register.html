@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register | Mini Marketplace</title>
+  <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<div th:replace="~{fragments/layout :: header('Register')}"></div>
+
+<main class="container">
+  <h2 class="section-title">Register</h2>
+  <section class="card">
+    <form id="registerForm" class="form">
+      <input id="regFullName" placeholder="Full Name" required>
+      <input id="regEmail" type="email" placeholder="Email" required>
+      <input id="regPassword" type="password" placeholder="Password" required>
+      <select id="regRole" required>
+        <option value="BUYER">BUYER</option>
+        <option value="SELLER">SELLER</option>
+        <option value="ADMIN">ADMIN</option>
+      </select>
+      <button class="btn btn-primary" type="submit">Create Account</button>
+    </form>
+  </section>
+  <div id="registerNotice" class="notice">Fill the form to register.</div>
+</main>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+
+<script th:src="@{/js/config.js}"></script>
+<script th:src="@{/js/ui.js}"></script>
+<script th:src="@{/js/register.js}"></script>
+</body>
+</html>
