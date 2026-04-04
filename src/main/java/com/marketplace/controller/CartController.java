@@ -17,7 +17,7 @@ import jakarta.validation.Valid;
  * Handles cart operations including add, remove, update items
  */
 @RestController
-@RequestMapping("/api/carts")
+@RequestMapping("/cart")
 public class CartController {
     
     private final CartService cartService;
