@@ -1,6 +1,4 @@
 (function () {
-  const notice = UI.byId("registerNotice");
-
   UI.byId("registerForm").addEventListener("submit", async function (e) {
     e.preventDefault();
     try {
@@ -10,12 +8,11 @@
         password: UI.byId("regPassword").value,
         role: UI.byId("regRole").value
       };
-      const data = await UI.post("/auth/register", payload);
-      APP.setAuth({ email: data.email, roles: data.roles || [] });
-      notice.textContent = "Registration successful. You can continue to login or browse products.";
-      UI.applyRoleGuards();
+      await UI.post("/auth/register", payload);
+      UI.toast("Account created successfully! Redirecting to login...", "success");
+      setTimeout(() => window.location.href = "/login", 2000);
     } catch (err) {
-      notice.textContent = "Register failed: " + err.message;
+      UI.toast("Registration failed: " + err.message, "error");
     }
   });
 })();

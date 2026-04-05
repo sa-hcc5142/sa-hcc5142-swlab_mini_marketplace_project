@@ -46,7 +46,7 @@ public class CartServiceImpl implements CartService {
     }
     
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public CartResponse getCart(Long buyerId) {
         // Verify buyer exists
         User buyer = userRepository.findById(buyerId)

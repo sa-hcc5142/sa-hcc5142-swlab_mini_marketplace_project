@@ -267,7 +267,7 @@ Configuration safety:
 ## Deployment
 
 - Platform: Render
-- Live URL: https://mini-marketplace-prod.onrender.com
+- Live URL: https://mini-marketplace-prod.onrender.com/
 - Repository: https://github.com/sa-hcc5142/sa-hcc5142-swlab_mini_marketplace_project
 
 ## Required Deliverable Files

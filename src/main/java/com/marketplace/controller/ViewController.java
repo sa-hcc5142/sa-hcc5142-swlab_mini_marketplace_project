@@ -8,7 +8,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 @Controller
 public class ViewController {
 
-    @GetMapping({"/", "/dashboard"})
+    @GetMapping("/")
+    public String index() {
+        return "dashboard";
+    }
+
+    @GetMapping("/dashboard")
     public String dashboard() {
         return "dashboard";
     }

@@ -27,15 +27,15 @@ public class GlobalExceptionHandler {
      * Returns 400 Bad Request with field-level error details.
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Map<String, String>>> handleValidationExceptions(
+    public ResponseEntity<ApiResponse<Void>> handleValidationExceptions(
             MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
+        StringBuilder errorMsg = new StringBuilder("Validation failed: ");
         ex.getBindingResult().getFieldErrors().forEach(error ->
-            errors.put(error.getField(), error.getDefaultMessage())
+            errorMsg.append(error.getField()).append(" (").append(error.getDefaultMessage()).append("), ")
         );
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.error("Validation failed"));
+                .body(ApiResponse.error(errorMsg.substring(0, errorMsg.length() - 2)));
     }
 
     /**

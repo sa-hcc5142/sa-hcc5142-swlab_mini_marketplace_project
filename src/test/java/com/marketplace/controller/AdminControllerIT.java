@@ -113,7 +113,7 @@ class AdminControllerIT {
     @Test
     @WithMockUser(username = "admin_test_user", roles = {"ADMIN"})
     void testGetAllUsers_AdminAccess_Success() throws Exception {
-        mockMvc.perform(get("/admin/users")
+        mockMvc.perform(get("/api/admin/users")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.content", hasSize(greaterThanOrEqualTo(1))))
@@ -127,7 +127,7 @@ class AdminControllerIT {
     @Test
     @WithMockUser(username = "admin_test_user", roles = {"ADMIN"})
     void testGetUserById_AdminAccess_Success() throws Exception {
-        mockMvc.perform(get("/admin/users/" + sellerUser.getId())
+        mockMvc.perform(get("/api/admin/users/" + sellerUser.getId())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id", equalTo(sellerUser.getId().intValue())))
@@ -144,7 +144,7 @@ class AdminControllerIT {
     void testUpdateUserRole_AdminAccess_Success() throws Exception {
         String requestBody = "{\"roleName\": \"BUYER\"}";
 
-        mockMvc.perform(put("/admin/users/" + sellerUser.getId() + "/role")
+        mockMvc.perform(put("/api/admin/users/" + sellerUser.getId() + "/role")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
                 .andExpect(status().isOk())
@@ -160,7 +160,7 @@ class AdminControllerIT {
     @Test
     @WithMockUser(username = "admin_test_user", roles = {"ADMIN"})
     void testDeactivateUser_AdminAccess_Success() throws Exception {
-        mockMvc.perform(put("/admin/users/" + buyerUser.getId() + "/deactivate")
+        mockMvc.perform(put("/api/admin/users/" + buyerUser.getId() + "/deactivate")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id", equalTo(buyerUser.getId().intValue())))
@@ -174,7 +174,7 @@ class AdminControllerIT {
     @Test
     @WithMockUser(username = "seller_test_user", roles = {"SELLER"})
     void testGetAllUsers_SellerAccess_Forbidden() throws Exception {
-        mockMvc.perform(get("/admin/users")
+        mockMvc.perform(get("/api/admin/users")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden());
     }
@@ -188,7 +188,7 @@ class AdminControllerIT {
     void testUpdateUserRole_BuyerAccess_Forbidden() throws Exception {
         String requestBody = "{\"roleName\": \"SELLER\"}";
 
-        mockMvc.perform(put("/admin/users/" + sellerUser.getId() + "/role")
+        mockMvc.perform(put("/api/admin/users/" + sellerUser.getId() + "/role")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
                 .andExpect(status().isForbidden());
@@ -200,8 +200,8 @@ class AdminControllerIT {
      */
     @Test
     void testGetAllUsers_UnauthenticatedAccess_Unauthorized() throws Exception {
-        mockMvc.perform(get("/admin/users")
+        mockMvc.perform(get("/api/admin/users")
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 }

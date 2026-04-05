@@ -128,7 +128,7 @@ class OrderControllerIT {
      */
     @Test
     void testGetOrdersEndpoint_UserOrders() throws Exception {
-        mockMvc.perform(get("/orders/me")
+        mockMvc.perform(get("/api/orders/me")
                         .with(user(String.valueOf(buyerUser.getId())).roles("BUYER"))
                 .param("page", "0")
                 .param("size", "10"))
@@ -143,7 +143,7 @@ class OrderControllerIT {
     void testPlaceOrderEndpoint_Success() throws Exception {
         OrderRequest request = new OrderRequest(List.of(new OrderItemRequest(product.getId(), 1)));
 
-        mockMvc.perform(post("/orders")
+        mockMvc.perform(post("/api/orders")
                         .with(user(String.valueOf(buyerUser.getId())).roles("BUYER"))
                 .with(csrf())
                 .contentType("application/json")

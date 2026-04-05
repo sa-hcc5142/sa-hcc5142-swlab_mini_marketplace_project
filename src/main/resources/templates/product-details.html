@@ -10,13 +10,58 @@
 <div th:replace="~{fragments/layout :: header('Product Details')}"></div>
 
 <main class="container">
-  <h2 class="section-title">Product Details</h2>
-  <div class="card">
-    <p class="kv">Product ID: <span class="mono" th:text="${productId}">0</span></p>
-    <pre id="productDetails" class="mono">Loading...</pre>
-    <div id="detailError" class="notice" style="display:none"></div>
-    <input id="productIdFromView" type="hidden" th:value="${productId}">
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <h2 class="section-title">Product Details</h2>
+    <a class="btn btn-ghost" th:href="@{/products/view}">← Back to Store</a>
   </div>
+  
+  <div id="detailError" class="notice" style="display:none"></div>
+  
+  <div class="grid" style="grid-template-columns: 2fr 1fr; align-items: start;">
+    <section class="card" id="productDetails">
+      <h3 style="margin-top:0" id="pdName">Loading...</h3>
+      <div class="flex gap-1 items-center mb-1">
+        <span class="badge" id="pdCategory"></span>
+        <span class="badge badge-COMPLETED" id="pdStock"></span>
+        <span class="badge badge-PENDING" id="pdAvgRating">⭐</span>
+      </div>
+      <p class="text-muted" style="margin:20px 0; font-size:16px;" id="pdDesc"></p>
+      
+      <div class="flex justify-between items-center" style="margin-top:20px; border-top:1px solid #eee; padding-top:20px;">
+        <h2 style="margin:0; color:var(--brand)" id="pdPrice"></h2>
+        
+        <div data-required-any="BUYER, ADMIN">
+          <form id="addToCartForm" class="qty-form">
+            <input type="number" id="pdQuantity" value="1" min="1">
+            <button class="btn btn-primary" type="submit">Add to Cart</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Reviews Section -->
+    <section class="card">
+      <h3 style="margin-top:0">Reviews</h3>
+      <div id="reviewsList" class="list" style="max-height: 400px; overflow-y:auto; gap: 8px;"></div>
+      
+      <div data-required-any="BUYER, ADMIN" style="margin-top:16px; border-top:1px solid #eee; padding-top:16px;">
+        <h4>Leave a Review</h4>
+        <form id="reviewForm" class="form w-full">
+          <select id="reviewRating" required>
+            <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+            <option value="4">⭐⭐⭐⭐ Good</option>
+            <option value="3">⭐⭐⭐ Fair</option>
+            <option value="2">⭐⭐ Poor</option>
+            <option value="1">⭐ Terrible</option>
+          </select>
+          <textarea id="reviewComment" placeholder="Write your thoughts..." required rows="2"></textarea>
+          <button class="btn btn-ghost w-full" type="submit">Submit Review</button>
+        </form>
+      </div>
+    </section>
+  </div>
+  
+  <input id="productIdFromView" type="hidden" th:value="${productId}">
 </main>
 
 <div th:replace="~{fragments/layout :: footer}"></div>
