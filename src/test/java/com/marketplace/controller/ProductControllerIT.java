@@ -70,7 +70,7 @@ class ProductControllerIT {
      */
     @Test
     void testGetProductsEndpoint_PublicAccess_Success() throws Exception {
-        mockMvc.perform(get("/products")
+        mockMvc.perform(get("/api/products")
                 .param("page", "0")
                 .param("size", "10"))
                 .andExpect(status().isOk())

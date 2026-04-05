@@ -136,7 +136,7 @@ class CartControllerIT {
 
     @Test
     void testGetCart_Success() throws Exception {
-        mockMvc.perform(get("/cart/me")
+        mockMvc.perform(get("/api/cart/me")
                 .with(user(String.valueOf(buyer.getId())).roles("BUYER")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.items").isArray())
@@ -147,7 +147,7 @@ class CartControllerIT {
     void testAddItemToCart_Success() throws Exception {
         CartItemRequest request = new CartItemRequest(product.getId(), 2);
 
-        mockMvc.perform(post("/cart/me/items")
+        mockMvc.perform(post("/api/cart/me/items")
                         .with(user(String.valueOf(buyer.getId())).roles("BUYER"))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -159,7 +159,7 @@ class CartControllerIT {
 
     @Test
     void testClearCart_Success() throws Exception {
-        mockMvc.perform(delete("/cart/me/items")
+        mockMvc.perform(delete("/api/cart/me/items")
                         .with(user(String.valueOf(buyer.getId())).roles("BUYER"))
                         .with(csrf()))
                 .andExpect(status().isOk())
@@ -168,7 +168,7 @@ class CartControllerIT {
 
     @Test
     void testGetCart_SellerForbidden() throws Exception {
-        mockMvc.perform(get("/cart/me")
+        mockMvc.perform(get("/api/cart/me")
                         .with(user(String.valueOf(seller.getId())).roles("SELLER")))
                 .andExpect(status().isForbidden());
     }

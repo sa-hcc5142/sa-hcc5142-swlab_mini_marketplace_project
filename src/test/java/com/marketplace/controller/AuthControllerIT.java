@@ -71,7 +71,7 @@ class AuthControllerIT {
                 RegisterRequest request = new RegisterRequest("New User", "new@marketplace.local", "password123", "BUYER");
 
         // Act & Assert
-        mockMvc.perform(post("/auth/register")
+        mockMvc.perform(post("/api/auth/register")
                 .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -96,7 +96,7 @@ class AuthControllerIT {
         LoginRequest loginRequest = new LoginRequest("test@marketplace.local", "password");
 
         // Act & Assert
-        mockMvc.perform(post("/auth/login")
+        mockMvc.perform(post("/api/auth/login")
                 .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
@@ -121,7 +121,7 @@ class AuthControllerIT {
         LoginRequest loginRequest = new LoginRequest("test@marketplace.local", "wrongpassword");
 
         // Act & Assert
-        mockMvc.perform(post("/auth/login")
+        mockMvc.perform(post("/api/auth/login")
                 .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
@@ -142,7 +142,7 @@ class AuthControllerIT {
                 userEntity.setFullName("Test User");
                 userRepository.save(userEntity);
 
-                mockMvc.perform(get("/auth/me")
+                mockMvc.perform(get("/api/auth/me")
                                 .with(user("test@marketplace.local").roles("BUYER")))
                                 .andExpect(status().isOk());
         }
