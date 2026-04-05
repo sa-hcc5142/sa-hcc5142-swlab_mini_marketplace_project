@@ -43,7 +43,7 @@ window.UI = {
       if (response.status === 401 || response.status === 403) {
         const path = window.location.pathname;
         if (path !== "/api/login" && path !== "/api/register" && path !== "/login" && path !== "/register") {
-          setTimeout(() => window.location.href = "/api/login", 2000);
+          setTimeout(() => window.location.href = "/login", 2000);
         }
         throw new Error(body.message || "Unauthorized. Please login again.");
       }

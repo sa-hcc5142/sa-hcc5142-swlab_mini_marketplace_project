@@ -12,8 +12,7 @@
 <main class="container">
   <section sec:authorize="hasAnyRole('BUYER','ADMIN')">
     <h2 class="section-title">Order History</h2>
-    <p class="kv">Protected endpoint: <span class="mono">GET /api/orders/me?page=0&size=10</span></p>
-    <pre id="ordersOutput" class="mono">Loading...</pre>
+    <div id="ordersContainer" class="list" style="margin-top:20px; gap:20px;"></div>
   </section>
   <section class="card" sec:authorize="!hasAnyRole('BUYER','ADMIN')">
     <h3>Order Access Restricted</h3>

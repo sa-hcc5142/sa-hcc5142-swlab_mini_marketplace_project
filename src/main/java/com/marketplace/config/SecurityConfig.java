@@ -28,34 +28,43 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .userDetailsService(customUserDetailsService)
                 .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.POST, "/auth/register", "/auth/login", "/auth/logout").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login", "/api/auth/logout").permitAll()
                 .requestMatchers(
-                        "/",
+                    "/",
                     "/dashboard",
                     "/login",
                     "/register",
                     "/products/view",
                     "/products/view/**",
-                        "/css/**",
-                        "/js/**",
-                        "/error"
+                    "/css/**",
+                    "/js/**",
+                    "/error"
                 ).permitAll()
                 .requestMatchers("/cart/view", "/orders/view").hasAnyRole("BUYER", "ADMIN")
                 .requestMatchers("/seller/dashboard").hasAnyRole("SELLER", "ADMIN")
                 .requestMatchers("/admin/dashboard").hasRole("ADMIN")
                 .requestMatchers("/actuator/health").permitAll()
-                .requestMatchers(HttpMethod.GET, "/products/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/products/*/reviews/**").hasAnyRole("BUYER", "ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/products/*/reviews/**").hasAnyRole("BUYER", "ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/products/*/reviews/**").hasAnyRole("BUYER", "ADMIN")
-                .requestMatchers(HttpMethod.POST, "/products/**").hasAnyRole("SELLER", "ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/products/**").hasAnyRole("SELLER", "ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/products/**").hasAnyRole("SELLER", "ADMIN")
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/orders/**").hasAnyRole("BUYER", "ADMIN")
-                        .anyRequest().authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/products/*/reviews/**").hasAnyRole("BUYER", "ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/products/*/reviews/**").hasAnyRole("BUYER", "ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/products/*/reviews/**").hasAnyRole("BUYER", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/products/**").hasAnyRole("SELLER", "ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/products/**").hasAnyRole("SELLER", "ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasAnyRole("SELLER", "ADMIN")
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/orders/**").hasAnyRole("BUYER", "ADMIN")
+                .requestMatchers("/api/cart/**").hasAnyRole("BUYER", "ADMIN")
+                .anyRequest().authenticated()
                 )
-                .logout(logout -> logout.logoutUrl("/auth/logout").permitAll());
+                .logout(logout -> logout.logoutUrl("/api/auth/logout").permitAll())
+                .httpBasic(basic -> basic.disable())
+                .exceptionHandling(exceptions -> exceptions
+                    .authenticationEntryPoint((request, response, authException) -> {
+                        response.setStatus(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED);
+                        response.setContentType("application/json");
+                        response.getWriter().write("{\"error\": \"Unauthorized - Please log in\"}");
+                    })
+                );
 
         return http.build();
     }

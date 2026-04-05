@@ -126,7 +126,7 @@ class ReviewControllerIT {
     @Test
     void testGetProductReviews_Paginated_Success() throws Exception {
         // Act & Assert
-        mockMvc.perform(get("/products/" + product.getId() + "/reviews")
+        mockMvc.perform(get("/api/products/" + product.getId() + "/reviews")
                         .param("page", "0")
                         .param("size", "10"))
             .andExpect(status().isOk())
@@ -139,7 +139,7 @@ class ReviewControllerIT {
     @Test
     void testGetReview_ById_Success() throws Exception {
         // Act & Assert
-        mockMvc.perform(get("/products/" + product.getId() + "/reviews/" + review.getId()))
+        mockMvc.perform(get("/api/products/" + product.getId() + "/reviews/" + review.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id").value(review.getId()));
     }
@@ -156,7 +156,7 @@ class ReviewControllerIT {
 
         // Note: This test assumes buyer has purchase history (would be verified in service)
         // Act & Assert
-        mockMvc.perform(post("/products/" + product.getId() + "/reviews")
+        mockMvc.perform(post("/api/products/" + product.getId() + "/reviews")
             .with(user(String.valueOf(buyerUser.getId())).roles("BUYER"))
                 .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -175,7 +175,7 @@ class ReviewControllerIT {
         reviewRequest.setComment("Updated");
 
         // Act & Assert
-        mockMvc.perform(put("/products/" + product.getId() + "/reviews/" + review.getId())
+        mockMvc.perform(put("/api/products/" + product.getId() + "/reviews/" + review.getId())
             .with(user(String.valueOf(sellerUser.getId())).roles("BUYER"))
                 .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -189,7 +189,7 @@ class ReviewControllerIT {
     @Test
     void testDeleteReview_OnlyAuthor_Success() throws Exception {
         // Act & Assert
-        mockMvc.perform(delete("/products/" + product.getId() + "/reviews/" + review.getId())
+        mockMvc.perform(delete("/api/products/" + product.getId() + "/reviews/" + review.getId())
                 .with(user(String.valueOf(buyerUser.getId())).roles("BUYER"))
                 .with(csrf()))
             .andExpect(status().isOk());
@@ -201,7 +201,7 @@ class ReviewControllerIT {
     @Test
     void testGetAverageRating_CalculatesCorrectly() throws Exception {
         // Act & Assert
-        mockMvc.perform(get("/products/" + product.getId() + "/reviews/rating/average"))
+        mockMvc.perform(get("/api/products/" + product.getId() + "/reviews/rating/average"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").isNumber());
     }

@@ -11,10 +11,46 @@
 
 <main class="container">
   <section sec:authorize="hasAnyRole('BUYER','ADMIN')">
-    <h2 class="section-title">My Cart</h2>
-    <p class="kv">Protected endpoint: <span class="mono">GET /api/cart/me</span></p>
-    <div class="notice">This page calls the live cart API.</div>
-    <pre id="cartOutput" class="mono">Loading...</pre>
+    <div class="flex justify-between items-center mb-2">
+      <h2 class="section-title" style="margin:0;">Shopping Cart</h2>
+      <div>
+        <button id="clearCartBtn" class="btn btn-ghost" style="color:var(--danger); border-color:var(--danger); display:none;">Clear Cart</button>
+      </div>
+    </div>
+    
+    <div id="cartMessage" class="notice" style="display:none"></div>
+    
+    <div class="grid" style="grid-template-columns: 3fr 1fr; align-items: start; gap:20px;">
+      <div class="table-wrapper" style="margin:0;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Price</th>
+              <th>Quantity</th>
+              <th>Subtotal</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="cartTableBody">
+            <tr><td colspan="5" class="text-center text-muted">Loading cart...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="card" id="cartSummary" style="display:none; position:sticky; top:100px;">
+        <h3 style="margin-top:0; border-bottom:1px solid #eee; padding-bottom:10px;">Order Summary</h3>
+        <div class="flex justify-between mb-1 mt-1">
+          <span class="text-muted">Total Items</span>
+          <strong id="cartTotalItems">0</strong>
+        </div>
+        <div class="flex justify-between mb-2">
+          <span class="text-muted">Grand Total</span>
+          <strong style="font-size:1.2rem; color:var(--brand);" id="cartTotalPrice">$0.00</strong>
+        </div>
+        <button id="checkoutBtn" class="btn btn-primary w-full">Place Order</button>
+      </div>
+    </div>
   </section>
   <section class="card" sec:authorize="!hasAnyRole('BUYER','ADMIN')">
     <h3>Cart Access Restricted</h3>
