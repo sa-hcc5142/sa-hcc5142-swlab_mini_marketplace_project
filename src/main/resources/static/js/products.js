@@ -13,14 +13,17 @@
 
     list.innerHTML = products.map(function (p) {
       return `
-        <article class="list-item">
-          <div>
-            <h3>${p.productName || "Unnamed Product"}</h3>
-            <p class="kv">${p.category || "General"} • Stock: ${p.stock ?? "n/a"}</p>
-            <p class="kv">$${p.price ?? "0.00"}</p>
+        <article class="card flex" style="flex-direction:column; justify-content:space-between;">
+          <div style="margin-bottom:12px;">
+            <div class="flex justify-between items-center mb-1">
+              <h3 style="margin:0">${p.productName || "Unnamed Product"}</h3>
+              <span class="badge">${UI.formatCurrency(p.price)}</span>
+            </div>
+            <p class="text-muted" style="font-size:14px; margin:4px 0">${p.category || "General"}</p>
+            <p class="text-muted" style="font-size:13px; margin:0">Stock: ${p.stock ?? "n/a"}</p>
           </div>
           <div>
-            <a class="btn btn-primary" href="/api/products/view/${p.id}">Details</a>
+            <a class="btn btn-primary w-full text-center" style="display:block; text-decoration:none;" href="/api/products/view/${p.id}">View Details</a>
           </div>
         </article>
       `;

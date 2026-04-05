@@ -11,24 +11,49 @@
 
 <main class="container">
   <section sec:authorize="hasAnyRole('SELLER','ADMIN')">
-    <h2 class="section-title">Seller Product Management</h2>
-    <div class="notice">Use this form to create products via <span class="mono">POST /api/products</span>.</div>
+    <div class="flex justify-between items-center mb-2">
+      <h2 class="section-title" style="margin:0">Seller Product Management</h2>
+    </div>
 
-    <section class="card">
-      <form id="sellerForm" class="form">
-        <input id="name" placeholder="Product name" required>
-        <textarea id="description" placeholder="Description" required></textarea>
-        <input id="price" type="number" min="0" step="0.01" placeholder="Price" required>
-        <input id="stock" type="number" min="0" step="1" placeholder="Stock" required>
-        <input id="category" placeholder="Category" required>
-        <button class="btn btn-primary" type="submit">Create Product</button>
-      </form>
-    </section>
+    <div class="grid" style="grid-template-columns: 1.5fr 2.5fr; align-items: start; gap: 20px;">
+      <!-- Create Product Form -->
+      <section class="card" style="position: sticky; top: 100px;">
+        <h3 style="margin-top:0;">Create New Product</h3>
+        <form id="sellerForm" class="form w-full">
+          <input id="name" placeholder="Product name" required>
+          <textarea id="description" placeholder="Description" required rows="3"></textarea>
+          <div class="flex gap-1" style="margin-bottom:12px;">
+            <input id="price" type="number" min="0" step="0.01" placeholder="Price" style="width:100%" required>
+            <input id="stock" type="number" min="0" step="1" placeholder="Stock" style="width:100%" required>
+          </div>
+          <input id="category" placeholder="Category" style="margin-bottom:12px; width:100%; display:block; padding:10px; border-radius:10px; border:1px solid rgba(15, 23, 42, 0.2);" required>
+          <button class="btn btn-primary w-full" type="submit">Create Product</button>
+        </form>
+      </section>
 
-    <section class="card">
-      <h3>Last API Response</h3>
-      <pre id="sellerOutput" class="mono">No request yet.</pre>
-    </section>
+      <!-- Managed Products List -->
+      <section class="card">
+        <h3 style="margin-top:0;">Catalog Overview</h3>
+        <p class="text-muted" style="margin-top:-10px; font-size:13px; margin-bottom:15px;">List of all products. Only edit/delete products you own.</p>
+        
+        <div class="table-wrapper" style="margin:0;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="sellerProductsList">
+              <tr><td colspan="5" class="text-center text-muted">Loading products...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
   </section>
 
   <section class="card" sec:authorize="!hasAnyRole('SELLER','ADMIN')">
