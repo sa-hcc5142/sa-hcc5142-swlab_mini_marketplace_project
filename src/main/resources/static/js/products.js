@@ -23,7 +23,7 @@
             <p class="text-muted" style="font-size:13px; margin:0">Stock: ${p.stock ?? "n/a"}</p>
           </div>
           <div>
-            <a class="btn btn-primary w-full text-center" style="display:block; text-decoration:none;" href="/api/products/view/${p.id}">View Details</a>
+            <a class="btn btn-primary w-full text-center" style="display:block; text-decoration:none;" href="/products/view/${p.id}">View Details</a>
           </div>
         </article>
       `;

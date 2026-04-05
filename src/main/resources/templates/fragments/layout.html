@@ -31,7 +31,7 @@
           if(window.UI && window.APP) {
             try { await window.UI.post("/auth/logout", {}); } catch(e){}
             window.APP.clearAuth();
-            window.location.href = "/api/login";
+            window.location.href = "/login";
           }
         });
       }
