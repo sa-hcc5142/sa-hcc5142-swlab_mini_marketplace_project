@@ -5,7 +5,7 @@
     try {
       const me = await UI.get("/auth/me");
       APP.setAuth({ email: me.email, roles: me.roles || [] });
-      window.location.href = "/api/dashboard"; // Redirect on existing session
+      window.location.href = "/dashboard"; // Redirect on existing session
     } catch (_) {
       APP.clearAuth();
     }

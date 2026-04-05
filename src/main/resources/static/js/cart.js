@@ -8,7 +8,7 @@
       const { data: cart } = await UI.get("/cart/me");
       
       if (!cart || !cart.items || cart.items.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Your cart is empty. <a href="/api/products/view">Browse products</a></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Your cart is empty. <a href="/products/view">Browse products</a></td></tr>';
         summaryBox.style.display = "none";
         clearBtn.style.display = "none";
         return;
@@ -100,7 +100,7 @@
       await UI.delete("/cart/me/items");
 
       UI.toast("Order placed successfully!", "success");
-      setTimeout(() => window.location.href = "/api/orders/view", 1500);
+      setTimeout(() => window.location.href = "/orders/view", 1500);
     } catch(err) {
       UI.toast("Checkout failed: " + err.message, "error");
     }
