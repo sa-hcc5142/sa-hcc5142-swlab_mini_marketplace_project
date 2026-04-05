@@ -3,20 +3,19 @@ package com.marketplace.service.impl;
 import com.marketplace.dto.order.OrderRequest;
 import com.marketplace.dto.order.OrderItemRequest;
 import com.marketplace.dto.order.OrderResponse;
-import com.marketplace.dto.order.OrderItemResponse;
 import com.marketplace.entity.Order;
 import com.marketplace.entity.OrderItem;
 import com.marketplace.entity.Product;
 import com.marketplace.entity.User;
 import com.marketplace.exception.ResourceNotFoundException;
 import com.marketplace.exception.InvalidOperationException;
+import com.marketplace.mapper.OrderMapper;
 import com.marketplace.repository.OrderRepository;
 import com.marketplace.repository.OrderItemRepository;
 import com.marketplace.repository.ProductRepository;
 import com.marketplace.repository.UserRepository;
 import com.marketplace.service.OrderService;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -34,13 +32,16 @@ public class OrderServiceImpl implements OrderService {
     private final OrderItemRepository orderItemRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final OrderMapper orderMapper;
 
     public OrderServiceImpl(OrderRepository orderRepository, OrderItemRepository orderItemRepository,
-                          ProductRepository productRepository, UserRepository userRepository) {
+                          ProductRepository productRepository, UserRepository userRepository,
+                          OrderMapper orderMapper) {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
+        this.orderMapper = orderMapper;
     }
 
     @Override
@@ -101,8 +102,10 @@ public class OrderServiceImpl implements OrderService {
             orderItemRepository.save(item);
         }
 
+        savedOrder.setItems(orderItems);
+
         // Return response
-        return mapToOrderResponse(savedOrder, orderItems);
+        return orderMapper.toOrderResponse(savedOrder);
     }
 
     @Override
@@ -115,42 +118,7 @@ public class OrderServiceImpl implements OrderService {
         // Fetch orders for buyer
         Page<Order> ordersPage = orderRepository.findByBuyer_Id(buyerId, pageable);
 
-        // Map to response DTOs
-        List<OrderResponse> responses = ordersPage.getContent().stream()
-                .map(order -> mapToOrderResponse(order, order.getItems()))
-                .collect(Collectors.toList());
-
-        return new PageImpl<>(responses, pageable, ordersPage.getTotalElements());
-    }
-
-    private OrderResponse mapToOrderResponse(Order order, List<OrderItem> orderItems) {
-        List<OrderItemResponse> itemResponses = orderItems.stream()
-                .map(item -> new OrderItemResponse(
-                        item.getId(),
-                        item.getProduct().getId(),
-                        item.getProduct().getProductName(),
-                        item.getQuantity(),
-                        item.getUnitPrice() != null ? item.getUnitPrice().doubleValue() : 0.0,
-                        item.getSubtotal() != null ? item.getSubtotal().doubleValue() : 0.0
-                ))
-                .collect(Collectors.toList());
-
-        return new OrderResponse(
-                order.getId(),
-                order.getBuyer().getId(),
-                itemResponses,
-                order.getTotalAmount() != null ? order.getTotalAmount().doubleValue() : 0.0,
-                order.getStatus(),
-                instantToLocalDateTime(order.getCreatedAt()),
-                instantToLocalDateTime(order.getUpdatedAt())
-        );
-    }
-
-    private java.time.LocalDateTime instantToLocalDateTime(Instant instant) {
-        if (instant == null) {
-            return null;
-        }
-        return java.time.LocalDateTime.ofInstant(instant, java.time.ZoneId.systemDefault());
+        return ordersPage.map(orderMapper::toOrderResponse);
     }
 }
 

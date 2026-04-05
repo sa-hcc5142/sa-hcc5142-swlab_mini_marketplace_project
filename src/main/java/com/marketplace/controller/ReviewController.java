@@ -3,6 +3,7 @@ package com.marketplace.controller;
 import com.marketplace.dto.ApiResponse;
 import com.marketplace.dto.review.ReviewRequest;
 import com.marketplace.dto.review.ReviewResponse;
+import com.marketplace.security.CurrentUserResolver;
 import com.marketplace.service.ReviewService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,9 +25,11 @@ import jakarta.validation.Valid;
 public class ReviewController {
     
     private final ReviewService reviewService;
+    private final CurrentUserResolver currentUserResolver;
     
-    public ReviewController(ReviewService reviewService) {
+    public ReviewController(ReviewService reviewService, CurrentUserResolver currentUserResolver) {
         this.reviewService = reviewService;
+        this.currentUserResolver = currentUserResolver;
     }
     
     /**
@@ -65,7 +68,7 @@ public class ReviewController {
             @Valid @RequestBody ReviewRequest reviewRequest,
             Authentication authentication) {
         
-        Long buyerId = getCurrentUserId(authentication);
+        Long buyerId = currentUserResolver.resolveUserId(authentication);
         ReviewResponse review = reviewService.addReview(productId, buyerId, reviewRequest);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Review added successfully", review));
@@ -82,7 +85,7 @@ public class ReviewController {
             @Valid @RequestBody ReviewRequest reviewRequest,
             Authentication authentication) {
         
-        Long buyerId = getCurrentUserId(authentication);
+        Long buyerId = currentUserResolver.resolveUserId(authentication);
         ReviewResponse review = reviewService.updateReview(reviewId, buyerId, reviewRequest);
         return ResponseEntity.ok(ApiResponse.success("Review updated successfully", review));
     }
@@ -97,7 +100,7 @@ public class ReviewController {
             @PathVariable Long reviewId,
             Authentication authentication) {
         
-        Long buyerId = getCurrentUserId(authentication);
+        Long buyerId = currentUserResolver.resolveUserId(authentication);
         reviewService.deleteReview(reviewId, buyerId);
         return ResponseEntity.ok(ApiResponse.success("Review deleted successfully"));
     }
@@ -109,18 +112,5 @@ public class ReviewController {
     public ResponseEntity<ApiResponse<Double>> getAverageRating(@PathVariable Long productId) {
         Double averageRating = reviewService.getProductAverageRating(productId);
         return ResponseEntity.ok(ApiResponse.success("Average rating retrieved successfully", averageRating));
-    }
-    
-    /**
-     * Helper method to extract user ID from Spring Security Authentication object
-     */
-    private Long getCurrentUserId(Authentication authentication) {
-        Object principal = authentication.getPrincipal();
-        if (principal instanceof org.springframework.security.core.userdetails.UserDetails) {
-            String username = ((org.springframework.security.core.userdetails.UserDetails) principal).getUsername();
-            // In a real scenario, extract userId from JWT claims or UserDetails custom implementation
-            return 1L; // Placeholder - should be extracted from authentication
-        }
-        throw new IllegalStateException("Unable to extract user ID from authentication");
     }
 }

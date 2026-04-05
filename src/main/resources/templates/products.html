@@ -1,12 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini Marketplace - Products</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Products | Mini Marketplace</title>
+  <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
 <body>
-<h1>Products</h1>
-<p>Day 1 placeholder. Product listing UI will be expanded in Day 3.</p>
+<div th:replace="~{fragments/layout :: header('Products')}"></div>
+
+<main class="container">
+  <h2 class="section-title">Product List</h2>
+  <p class="kv">Public listing endpoint: <span class="mono">GET /api/products</span></p>
+  <div id="productsList" class="list"></div>
+  <div id="productsError" class="notice" style="display:none"></div>
+</main>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+
+<script th:src="@{/js/config.js}"></script>
+<script th:src="@{/js/ui.js}"></script>
+<script th:src="@{/js/products.js}"></script>
 </body>
 </html>

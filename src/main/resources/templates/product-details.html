@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Details | Mini Marketplace</title>
+  <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<div th:replace="~{fragments/layout :: header('Product Details')}"></div>
+
+<main class="container">
+  <h2 class="section-title">Product Details</h2>
+  <div class="card">
+    <p class="kv">Product ID: <span class="mono" th:text="${productId}">0</span></p>
+    <pre id="productDetails" class="mono">Loading...</pre>
+    <div id="detailError" class="notice" style="display:none"></div>
+    <input id="productIdFromView" type="hidden" th:value="${productId}">
+  </div>
+</main>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+
+<script th:src="@{/js/config.js}"></script>
+<script th:src="@{/js/ui.js}"></script>
+<script th:src="@{/js/product-details.js}"></script>
+</body>
+</html>

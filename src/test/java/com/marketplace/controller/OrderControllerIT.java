@@ -1,6 +1,8 @@
 package com.marketplace.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.marketplace.dto.order.OrderItemRequest;
+import com.marketplace.dto.order.OrderRequest;
 import com.marketplace.entity.Order;
 import com.marketplace.entity.Product;
 import com.marketplace.entity.Role;
@@ -14,18 +16,26 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.List;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
+@Sql(scripts = {"/sql/test-cleanup.sql", "/sql/test-seed-roles.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Transactional
 class OrderControllerIT {
 
@@ -77,6 +87,7 @@ class OrderControllerIT {
         // Setup users
         buyerUser = new User();
         buyerUser.setUsername("buyer");
+        buyerUser.setFullName("Buyer User");
         buyerUser.setEmail("buyer@marketplace.local");
         buyerUser.setPassword("hashed");
         buyerUser.setRole(buyerRole);
@@ -85,6 +96,7 @@ class OrderControllerIT {
 
         sellerUser = new User();
         sellerUser.setUsername("seller");
+        sellerUser.setFullName("Seller User");
         sellerUser.setEmail("seller@marketplace.local");
         sellerUser.setPassword("hashed");
         sellerUser.setRole(sellerRole);
@@ -106,6 +118,8 @@ class OrderControllerIT {
         order.setBuyer(buyerUser);
         order.setTotalAmount(new BigDecimal("99.99"));
         order.setStatus("PENDING");
+        order.setCreatedAt(Instant.now());
+        order.setUpdatedAt(Instant.now());
         order = orderRepository.save(order);
     }
 
@@ -113,24 +127,28 @@ class OrderControllerIT {
      * Test Case 1: Get Orders Endpoint - User Orders
      */
     @Test
-    @WithMockUser(username = "buyer", roles = {"BUYER"})
     void testGetOrdersEndpoint_UserOrders() throws Exception {
-        // Act & Assert
-        mockMvc.perform(get("/api/orders")
-                        .header("Authorization", "Bearer dummy-token"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray());
+        mockMvc.perform(get("/orders/me")
+                        .with(user(String.valueOf(buyerUser.getId())).roles("BUYER"))
+                .param("page", "0")
+                .param("size", "10"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.content").isArray());
     }
 
     /**
      * Test Case 2: Place Order Endpoint - Success
      */
     @Test
-    @WithMockUser(username = "buyer", roles = {"BUYER"})
     void testPlaceOrderEndpoint_Success() throws Exception {
-        // Act & Assert - Assuming endpoint exists for creating order
-        mockMvc.perform(get("/api/orders")
-                        .header("Authorization", "Bearer dummy-token"))
-                .andExpect(status().isOk());
+        OrderRequest request = new OrderRequest(List.of(new OrderItemRequest(product.getId(), 1)));
+
+        mockMvc.perform(post("/orders")
+                        .with(user(String.valueOf(buyerUser.getId())).roles("BUYER"))
+                .with(csrf())
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.data.status").value("PENDING"));
     }
 }

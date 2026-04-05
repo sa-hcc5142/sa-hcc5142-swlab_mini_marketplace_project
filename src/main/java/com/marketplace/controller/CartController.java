@@ -3,6 +3,7 @@ package com.marketplace.controller;
 import com.marketplace.dto.ApiResponse;
 import com.marketplace.dto.cart.CartItemRequest;
 import com.marketplace.dto.cart.CartResponse;
+import com.marketplace.security.CurrentUserResolver;
 import com.marketplace.service.CartService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,9 +22,11 @@ import jakarta.validation.Valid;
 public class CartController {
     
     private final CartService cartService;
+    private final CurrentUserResolver currentUserResolver;
     
-    public CartController(CartService cartService) {
+    public CartController(CartService cartService, CurrentUserResolver currentUserResolver) {
         this.cartService = cartService;
+        this.currentUserResolver = currentUserResolver;
     }
     
     /**
@@ -32,7 +35,7 @@ public class CartController {
     @GetMapping("/me")
     @PreAuthorize("hasAnyRole('BUYER', 'ADMIN')")
     public ResponseEntity<ApiResponse<CartResponse>> getCart(Authentication authentication) {
-        Long buyerId = getCurrentUserId(authentication);
+        Long buyerId = currentUserResolver.resolveUserId(authentication);
         CartResponse cart = cartService.getCart(buyerId);
         return ResponseEntity.ok(ApiResponse.success("Cart retrieved successfully", cart));
     }
@@ -45,7 +48,7 @@ public class CartController {
     public ResponseEntity<ApiResponse<CartResponse>> addItem(
             @Valid @RequestBody CartItemRequest itemRequest,
             Authentication authentication) {
-        Long buyerId = getCurrentUserId(authentication);
+        Long buyerId = currentUserResolver.resolveUserId(authentication);
         CartResponse cart = cartService.addItem(buyerId, itemRequest);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Item added to cart successfully", cart));
@@ -60,7 +63,7 @@ public class CartController {
             @PathVariable Long cartItemId,
             @RequestParam Integer quantity,
             Authentication authentication) {
-        Long buyerId = getCurrentUserId(authentication);
+        Long buyerId = currentUserResolver.resolveUserId(authentication);
         CartResponse cart = cartService.updateItem(buyerId, cartItemId, quantity);
         return ResponseEntity.ok(ApiResponse.success("Item updated successfully", cart));
     }
@@ -73,7 +76,7 @@ public class CartController {
     public ResponseEntity<ApiResponse<CartResponse>> removeItem(
             @PathVariable Long cartItemId,
             Authentication authentication) {
-        Long buyerId = getCurrentUserId(authentication);
+        Long buyerId = currentUserResolver.resolveUserId(authentication);
         CartResponse cart = cartService.removeItem(buyerId, cartItemId);
         return ResponseEntity.ok(ApiResponse.success("Item removed from cart successfully", cart));
     }
@@ -84,21 +87,8 @@ public class CartController {
     @DeleteMapping("/me/items")
     @PreAuthorize("hasAnyRole('BUYER', 'ADMIN')")
     public ResponseEntity<ApiResponse<Void>> clearCart(Authentication authentication) {
-        Long buyerId = getCurrentUserId(authentication);
+        Long buyerId = currentUserResolver.resolveUserId(authentication);
         cartService.clearCart(buyerId);
         return ResponseEntity.ok(ApiResponse.success("Cart cleared successfully"));
-    }
-    
-    /**
-     * Helper method to extract user ID from Spring Security Authentication object
-     */
-    private Long getCurrentUserId(Authentication authentication) {
-        Object principal = authentication.getPrincipal();
-        if (principal instanceof org.springframework.security.core.userdetails.UserDetails) {
-            String username = ((org.springframework.security.core.userdetails.UserDetails) principal).getUsername();
-            // In a real scenario, extract userId from JWT claims or UserDetails custom implementation
-            return 1L; // Placeholder - should be extracted from authentication
-        }
-        throw new IllegalStateException("Unable to extract user ID from authentication");
     }
 }
