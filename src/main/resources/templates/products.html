@@ -10,9 +10,10 @@
 <div th:replace="~{fragments/layout :: header('Products')}"></div>
 
 <main class="container">
-  <h2 class="section-title">Product List</h2>
-  <p class="kv">Public listing endpoint: <span class="mono">GET /api/products</span></p>
-  <div id="productsList" class="list"></div>
+  <div class="flex justify-between items-center mb-2">
+    <h2 class="section-title" style="margin:0;">Store Catalog</h2>
+  </div>
+  <div id="productsList" class="grid"></div>
   <div id="productsError" class="notice" style="display:none"></div>
 </main>
 
