@@ -11,17 +11,32 @@
 
 <main class="container">
   <section sec:authorize="hasRole('ADMIN')">
-    <h2 class="section-title">Admin User Management</h2>
-    <div class="notice">Loads <span class="mono">GET /api/admin/users?page=0&size=10</span>.</div>
-    <section class="card">
-      <button id="refreshUsers" class="btn btn-primary" type="button">Refresh Users</button>
-      <pre id="adminOutput" class="mono">Click refresh to load users.</pre>
-    </section>
+    <div class="flex justify-between items-center mb-2">
+      <h2 class="section-title" style="margin:0;">User Management</h2>
+      <button id="refreshUsers" class="btn btn-ghost">Refresh Users</button>
+    </div>
+
+    <div class="card table-wrapper" style="margin:0; padding:0;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Roles</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="adminUsersList">
+          <tr><td colspan="5" class="text-center text-muted" style="padding:20px;">Click refresh to load users...</td></tr>
+        </tbody>
+      </table>
+    </div>
   </section>
 
   <section class="card" sec:authorize="!hasRole('ADMIN')">
-    <h3>Admin Access Restricted</h3>
-    <p class="kv">Login as ADMIN to use this dashboard.</p>
+    <h3 style="color:var(--danger)">Access Denied</h3>
+    <p class="kv">This page is restricted to administrators.</p>
   </section>
 </main>
 

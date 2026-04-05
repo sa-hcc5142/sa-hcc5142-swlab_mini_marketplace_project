@@ -1,23 +1,14 @@
 (function () {
   const notice = UI.byId("authNotice");
 
-  async function syncFromServer(messageOnSuccess) {
+  async function syncFromServer() {
     try {
       const me = await UI.get("/auth/me");
       APP.setAuth({ email: me.email, roles: me.roles || [] });
-      refreshView(messageOnSuccess || "Authenticated server session detected.");
-      return;
+      window.location.href = "/api/dashboard"; // Redirect on existing session
     } catch (_) {
       APP.clearAuth();
-      refreshView("No active server session.");
     }
-  }
-
-  function refreshView(message) {
-    const auth = APP.getAuth();
-    UI.setText("authNotice", message || (auth.email ? "Local session present." : "No local session yet."));
-    UI.showJson("authJson", auth);
-    UI.applyRoleGuards();
   }
 
   UI.byId("loginForm").addEventListener("submit", async function (e) {
@@ -28,21 +19,15 @@
         password: UI.byId("loginPassword").value
       };
       await UI.post("/auth/login", payload);
-      await syncFromServer("Login successful with active server session.");
+      // Wait to populate the local session, then redirect
+      const me = await UI.get("/auth/me");
+      APP.setAuth({ email: me.email, roles: me.roles || [] });
+      window.location.href = "/api/dashboard";
     } catch (err) {
-      notice.textContent = "Login failed: " + err.message;
+      UI.toast("Login failed: " + err.message, "error");
     }
   });
 
-  UI.byId("logoutBtn").addEventListener("click", async function () {
-    try {
-      await UI.post("/auth/logout", {});
-    } catch (_) {
-      // If logout endpoint returns an error, still clear local cache.
-    }
-    APP.clearAuth();
-    refreshView("Logged out and local session cleared.");
-  });
-
+  // Check if already logged in on page load
   syncFromServer();
 })();

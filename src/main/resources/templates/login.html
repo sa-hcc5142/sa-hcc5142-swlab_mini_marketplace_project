@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,17 +10,20 @@
 <div th:replace="~{fragments/layout :: header('Login')}"></div>
 
 <main class="container">
-  <h2 class="section-title">Login</h2>
-  <section class="card">
-    <form id="loginForm" class="form">
-      <input id="loginEmail" type="email" placeholder="Email" required>
-      <input id="loginPassword" type="password" placeholder="Password" required>
-      <button class="btn btn-primary" type="submit">Login</button>
-      <button id="logoutBtn" class="btn btn-ghost" type="button">Clear Local Session</button>
+  <div class="card" style="max-width: 400px; margin: 40px auto;">
+    <h2 class="section-title text-center" style="margin-top:0;">Welcome Back</h2>
+    <p class="text-center text-muted mb-2">Sign in to access your dashboard</p>
+    
+    <form id="loginForm" class="form w-full">
+      <input type="email" id="loginEmail" placeholder="Email" required>
+      <input type="password" id="loginPassword" placeholder="Password" required>
+      <button class="btn btn-primary w-full" type="submit">Sign In</button>
     </form>
-  </section>
-  <div id="authNotice" class="notice">No local session yet.</div>
-  <pre id="authJson" class="mono"></pre>
+    
+    <div class="text-center mt-2">
+      <p class="kv">Don't have an account? <a th:href="@{/register}">Register here</a></p>
+    </div>
+  </div>
 </main>
 
 <div th:replace="~{fragments/layout :: footer}"></div>
