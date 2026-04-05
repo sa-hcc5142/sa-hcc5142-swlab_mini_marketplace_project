@@ -83,7 +83,7 @@ class ProductControllerIT {
      */
     @Test
     void testGetProductByIdEndpoint_PublicAccess_Success() throws Exception {
-        mockMvc.perform(get("/products/" + product.getId()))
+        mockMvc.perform(get("/api/products/" + product.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.productName").value("Test Product"))
                 .andExpect(jsonPath("$.data.price").value(99.99));
@@ -102,7 +102,7 @@ class ProductControllerIT {
                 "Electronics"
         );
 
-        mockMvc.perform(post("/products")
+        mockMvc.perform(post("/api/products")
                 .with(user(String.valueOf(seller.getId())).roles("SELLER"))
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -125,7 +125,7 @@ class ProductControllerIT {
                 "Electronics"
         );
 
-        mockMvc.perform(post("/products")
+        mockMvc.perform(post("/api/products")
                 .with(user("buyer").roles("BUYER"))
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -146,7 +146,7 @@ class ProductControllerIT {
                 "Electronics"
         );
 
-        mockMvc.perform(put("/products/" + product.getId())
+        mockMvc.perform(put("/api/products/" + product.getId())
                 .with(user(String.valueOf(seller.getId())).roles("SELLER"))
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -160,7 +160,7 @@ class ProductControllerIT {
      */
     @Test
     void testDeleteProductEndpoint_SellerOwner_Success() throws Exception {
-        mockMvc.perform(delete("/products/" + product.getId())
+        mockMvc.perform(delete("/api/products/" + product.getId())
                                 .with(user(String.valueOf(seller.getId())).roles("SELLER"))
                 .with(csrf()))
                 .andExpect(status().isOk());
@@ -171,7 +171,7 @@ class ProductControllerIT {
      */
     @Test
     void testGetProductByIdEndpoint_NotFound() throws Exception {
-                mockMvc.perform(get("/products/999"))
+                mockMvc.perform(get("/api/products/999"))
                 .andExpect(status().isNotFound());
     }
 }

@@ -202,6 +202,6 @@ class AdminControllerIT {
     void testGetAllUsers_UnauthenticatedAccess_Unauthorized() throws Exception {
         mockMvc.perform(get("/api/admin/users")
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 }
