@@ -8,8 +8,8 @@ Build and demonstrate a professional workflow using Spring Boot, Thymeleaf, Post
 
 ## Team
 
-- S
-- M
+- Sumaiya Akter
+- Khadimul Islam Mahi
 
 ## Theme and Roles
 
