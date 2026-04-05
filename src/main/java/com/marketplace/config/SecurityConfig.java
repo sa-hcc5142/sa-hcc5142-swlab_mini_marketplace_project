@@ -55,7 +55,15 @@ public class SecurityConfig {
                 .requestMatchers("/orders/**").hasAnyRole("BUYER", "ADMIN")
                         .anyRequest().authenticated()
                 )
-                .logout(logout -> logout.logoutUrl("/auth/logout").permitAll());
+                .logout(logout -> logout.logoutUrl("/auth/logout").permitAll())
+                .httpBasic(basic -> basic.disable())
+                .exceptionHandling(exceptions -> exceptions
+                    .authenticationEntryPoint((request, response, authException) -> {
+                        response.setStatus(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED);
+                        response.setContentType("application/json");
+                        response.getWriter().write("{\"error\": \"Unauthorized - Please log in\"}");
+                    })
+                );
 
         return http.build();
     }

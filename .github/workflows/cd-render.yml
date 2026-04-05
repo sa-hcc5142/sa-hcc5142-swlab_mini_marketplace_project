@@ -70,7 +70,7 @@ jobs:
         ATTEMPT=1
         while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
           echo "Health check attempt $ATTEMPT/$MAX_ATTEMPTS..."
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://mini-marketplace-prod.onrender.com/api/actuator/health || echo "000")
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://mini-marketplace-prod.onrender.com/actuator/health || echo "000")
           if [ "$HTTP_STATUS" = "200" ]; then
             echo "✅ Application is healthy!"
             exit 0
@@ -88,7 +88,7 @@ jobs:
         echo "Service: mini-marketplace-prod" >> $GITHUB_STEP_SUMMARY
         echo "Status: Deployment triggered to Render via API" >> $GITHUB_STEP_SUMMARY
         echo "Live URL: https://mini-marketplace-prod.onrender.com" >> $GITHUB_STEP_SUMMARY
-        echo "Health: https://mini-marketplace-prod.onrender.com/api/actuator/health" >> $GITHUB_STEP_SUMMARY
+        echo "Health: https://mini-marketplace-prod.onrender.com/actuator/health" >> $GITHUB_STEP_SUMMARY
         SERVICE_ID="${{ secrets.RENDER_SERVICE_ID }}"
         if [[ "$SERVICE_ID" != srv-* ]]; then
           SERVICE_ID="srv-$SERVICE_ID"

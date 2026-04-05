@@ -22,7 +22,7 @@
       // Wait to populate the local session, then redirect
       const me = await UI.get("/auth/me");
       APP.setAuth({ email: me.email, roles: me.roles || [] });
-      window.location.href = "/api/dashboard";
+      window.location.href = "/dashboard";
     } catch (err) {
       UI.toast("Login failed: " + err.message, "error");
     }
