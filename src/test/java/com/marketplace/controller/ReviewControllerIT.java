@@ -139,6 +139,7 @@ class ReviewControllerIT {
         order.setStatus("DELIVERED");
         order.setTotalAmount(BigDecimal.valueOf(99.99));
         order.setCreatedAt(Instant.now());
+        order.setUpdatedAt(Instant.now());
         
         OrderItem item = new OrderItem();
         item.setOrder(order);
