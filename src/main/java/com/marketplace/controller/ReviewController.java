@@ -91,17 +91,15 @@ public class ReviewController {
     }
     
     /**
-     * Delete your own review (BUYER only)
+     * DELETE /api/reviews/{id} - Delete a review (BUYER/ADMIN only)
      */
-    @DeleteMapping("/{reviewId}")
+    @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('BUYER', 'ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteReview(
-            @PathVariable Long productId,
-            @PathVariable Long reviewId,
+            @PathVariable Long id,
             Authentication authentication) {
-        
-        Long buyerId = currentUserResolver.resolveUserId(authentication);
-        reviewService.deleteReview(reviewId, buyerId);
+        Long currentUserId = currentUserResolver.resolveUserId(authentication);
+        reviewService.deleteReview(id, currentUserId);
         return ResponseEntity.ok(ApiResponse.success("Review deleted successfully"));
     }
     

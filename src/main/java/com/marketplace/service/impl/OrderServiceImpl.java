@@ -120,5 +120,41 @@ public class OrderServiceImpl implements OrderService {
 
         return ordersPage.map(orderMapper::toOrderResponse);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<OrderResponse> getAllOrders(Pageable pageable) {
+        return orderRepository.findAll(pageable).map(orderMapper::toOrderResponse);
+    }
+
+    @Override
+    public OrderResponse updateOrderStatus(Long orderId, String newStatus) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + orderId));
+
+        String currentStatus = order.getStatus().toUpperCase();
+        String targetStatus = newStatus.toUpperCase();
+
+        if (currentStatus.equals(targetStatus)) {
+            return orderMapper.toOrderResponse(order);
+        }
+
+        // Validate "one-way" status transition
+        boolean isValid = switch (currentStatus) {
+            case "PENDING" -> targetStatus.equals("SHIPPED") || targetStatus.equals("DELIVERED");
+            case "SHIPPED" -> targetStatus.equals("DELIVERED");
+            default -> false; // DELIVERED is terminal
+        };
+
+        if (!isValid) {
+            throw new InvalidOperationException("Invalid status transition from " + currentStatus + " to " + targetStatus);
+        }
+
+        order.setStatus(targetStatus);
+        order.setUpdatedAt(Instant.now());
+        
+        Order updatedOrder = orderRepository.save(order);
+        return orderMapper.toOrderResponse(updatedOrder);
+    }
 }
 

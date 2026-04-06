@@ -65,14 +65,15 @@ public class ReviewServiceImpl implements ReviewService {
             throw new InvalidOperationException("Buyer has already reviewed this product");
         }
         
-        // Verify buyer has purchased this product (check if any order from this buyer contains this product)
-        boolean hasPurchased = orderRepository.findAll().stream()
+        // Verify buyer has purchased AND received this product (check if any DELIVERED order from this buyer contains this product)
+        boolean hasReceivedPurchased = orderRepository.findAll().stream()
                 .filter(order -> order.getBuyer().getId().equals(buyerId))
+                .filter(order -> order.getStatus().equalsIgnoreCase("DELIVERED"))
                 .anyMatch(order -> order.getItems().stream()
                         .anyMatch(item -> item.getProduct().getId().equals(productId)));
         
-        if (!hasPurchased) {
-            throw new InvalidOperationException("Buyer must purchase the product before reviewing");
+        if (!hasReceivedPurchased) {
+            throw new InvalidOperationException("Buyer must have a DELIVERED order for this product before reviewing");
         }
         
         // Validate rating
@@ -151,16 +152,20 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public void deleteReview(Long reviewId, Long buyerId) {
         // Verify buyer exists
-        userRepository.findById(buyerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Buyer not found with id: " + buyerId));
+        User caller = userRepository.findById(buyerId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + buyerId));
         
         // Find review
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ResourceNotFoundException("Review not found with id: " + reviewId));
         
-        // Verify buyer is the review author
-        if (!review.getBuyer().getId().equals(buyerId)) {
-            throw new InvalidOperationException("Only the review author can delete this review");
+        // Check if admin bypass is allowed
+        boolean isAdmin = caller.getRoles().stream()
+                .anyMatch(r -> r.getName().equals("ADMIN"));
+
+        // Verify buyer is the author or admin
+        if (!isAdmin && !review.getBuyer().getId().equals(buyerId)) {
+            throw new InvalidOperationException("Only the review author or an ADMIN can delete this review");
         }
         
         reviewRepository.delete(review);

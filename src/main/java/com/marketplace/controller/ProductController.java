@@ -49,11 +49,8 @@ public class ProductController {
         );
     }
 
-    /**
-     * POST /api/products - Create a new product (SELLER/ADMIN only)
-     */
     @PostMapping
-    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
+    @PreAuthorize("hasRole('SELLER')")
     public ResponseEntity<ApiResponse<ProductResponse>> createProduct(
             @Valid @RequestBody ProductRequest request,
             Authentication authentication) {
@@ -64,10 +61,10 @@ public class ProductController {
     }
 
     /**
-     * PUT /api/products/{id} - Update an existing product (SELLER/ADMIN only, owner verification required)
+     * PUT /api/products/{id} - Update an existing product (SELLER only, owner verification required)
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
+    @PreAuthorize("hasRole('SELLER')")
     public ResponseEntity<ApiResponse<ProductResponse>> updateProduct(
             @PathVariable Long id,
             @Valid @RequestBody ProductRequest request,
@@ -80,10 +77,10 @@ public class ProductController {
     }
 
     /**
-     * DELETE /api/products/{id} - Delete a product (SELLER/ADMIN only, owner verification required)
+     * DELETE /api/products/{id} - Delete a product (SELLER only, owner verification required)
      */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
+    @PreAuthorize("hasRole('SELLER')")
     public ResponseEntity<ApiResponse<Void>> deleteProduct(
             @PathVariable Long id,
             Authentication authentication) {

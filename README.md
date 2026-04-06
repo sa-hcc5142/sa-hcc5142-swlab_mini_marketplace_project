@@ -8,8 +8,8 @@ Build and demonstrate a professional workflow using Spring Boot, Thymeleaf, Post
 
 ## Team
 
-- S
-- M
+- Sumaiya Akter
+- Khadimul Islam Mahi
 
 ## Theme and Roles
 
@@ -136,6 +136,7 @@ erDiagram
 	PRODUCTS {
 		bigint id PK
 		string product_name
+		string description
 		double price
 		int stock
 		string category

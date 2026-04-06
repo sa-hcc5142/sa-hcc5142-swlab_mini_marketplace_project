@@ -29,6 +29,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -59,6 +60,7 @@ class OrderControllerIT {
 
     private User buyerUser;
     private User sellerUser;
+    private User adminUser;
     private Product product;
     private Order order;
 
@@ -102,6 +104,22 @@ class OrderControllerIT {
         sellerUser.setRole(sellerRole);
         sellerUser.setActive(true);
         sellerUser = userRepository.save(sellerUser);
+
+        Role adminRole = roleRepository.findByName("ADMIN")
+                .orElseGet(() -> {
+                    Role role = new Role();
+                    role.setName("ADMIN");
+                    return roleRepository.save(role);
+                });
+
+        adminUser = new User();
+        adminUser.setUsername("admin");
+        adminUser.setFullName("Admin User");
+        adminUser.setEmail("admin@marketplace.local");
+        adminUser.setPassword("hashed");
+        adminUser.setRole(adminRole);
+        adminUser.setActive(true);
+        adminUser = userRepository.save(adminUser);
 
         // Setup product
         product = new Product();
@@ -150,5 +168,32 @@ class OrderControllerIT {
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.data.status").value("PENDING"));
+    }
+
+    /**
+     * Test Case 3: Get All Orders - Admin Success
+     */
+    @Test
+    void testGetAllOrders_AdminAccess_Success() throws Exception {
+        mockMvc.perform(get("/api/orders/admin")
+                        .with(user(String.valueOf(adminUser.getId())).roles("ADMIN")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.content").isArray());
+    }
+
+    /**
+     * Test Case 4: Update Order Status - Admin Success
+     */
+    @Test
+    void testUpdateOrderStatus_AdminAccess_Success() throws Exception {
+        String requestBody = "{\"status\": \"SHIPPED\"}";
+
+        mockMvc.perform(patch("/api/orders/" + order.getId() + "/status")
+                        .with(user(String.valueOf(adminUser.getId())).roles("ADMIN"))
+                .with(csrf())
+                .contentType("application/json")
+                .content(requestBody))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.status").value("SHIPPED"));
     }
 }

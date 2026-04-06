@@ -24,4 +24,20 @@ public interface OrderService {
      * @throws com.marketplace.exception.ResourceNotFoundException if buyer not found
      */
     Page<OrderResponse> getBuyerOrders(Long buyerId, Pageable pageable);
+
+    /**
+     * Get all orders globally (ADMIN only)
+     * @param pageable Pagination information
+     * @return Page of OrderResponse
+     */
+    Page<OrderResponse> getAllOrders(Pageable pageable);
+
+    /**
+     * Update order status (ADMIN only)
+     * Progression: PENDING -> SHIPPED -> DELIVERED (Forward only)
+     * @param orderId ID of the order to update
+     * @param newStatus New status to set
+     * @return Updated OrderResponse
+     */
+    OrderResponse updateOrderStatus(Long orderId, String newStatus);
 }
