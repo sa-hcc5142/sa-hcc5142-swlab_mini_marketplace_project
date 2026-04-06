@@ -8,9 +8,9 @@
       <nav class="nav items-center">
         <a th:href="@{/dashboard}">Dashboard</a>
         <a th:href="@{/products/view}">Products</a>
-        <a th:href="@{/cart/view}" sec:authorize="hasAnyRole('BUYER','ADMIN')">Cart</a>
-        <a th:href="@{/orders/view}" sec:authorize="hasAnyRole('BUYER','ADMIN')">Orders</a>
-        <a th:href="@{/seller/dashboard}" sec:authorize="hasAnyRole('SELLER','ADMIN')">Seller</a>
+        <a th:href="@{/cart/view}" sec:authorize="hasRole('BUYER')">Cart</a>
+        <a th:href="@{/orders/view}" sec:authorize="hasRole('BUYER')">Orders</a>
+        <a th:href="@{/seller/dashboard}" sec:authorize="hasRole('SELLER')">Seller</a>
         <a th:href="@{/admin/dashboard}" sec:authorize="hasRole('ADMIN')">Admin</a>
         
         <span class="text-muted" style="margin-left: 10px;" sec:authorize="isAuthenticated()">|</span>

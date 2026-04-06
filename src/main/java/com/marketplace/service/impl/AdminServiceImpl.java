@@ -73,7 +73,7 @@ public class AdminServiceImpl implements AdminService {
                 .orElseThrow(() -> ResourceNotFoundException.notFound("Role", request.getRoleName()));
 
         // Check if this is last admin being demoted
-        if (!newRole.getName().equals("ADMIN") && isLastAdminBeingDemoted(user, newRole)) {
+        if (!(newRole.getName().equals("ADMIN") || newRole.getName().equals("ROLE_ADMIN")) && isLastAdminBeingDemoted(user, newRole)) {
             throw new InvalidOperationException("Cannot demote the last ADMIN user");
         }
 
@@ -103,7 +103,7 @@ public class AdminServiceImpl implements AdminService {
         }
 
         // Prevent deactivating only admin
-        if (user.getRole().getName().equals("ADMIN") && isOnlyAdmin(user)) {
+        if ((user.getRole().getName().equals("ADMIN") || user.getRole().getName().equals("ROLE_ADMIN")) && isOnlyAdmin(user)) {
             throw new InvalidOperationException("Cannot deactivate the only ADMIN user");
         }
 
@@ -209,12 +209,12 @@ public class AdminServiceImpl implements AdminService {
      * Check if user would be last admin if demoted
      */
     private boolean isLastAdminBeingDemoted(User user, Role newRole) {
-        if (newRole.getName().equals("ADMIN")) {
+        if (newRole.getName().equals("ADMIN") || newRole.getName().equals("ROLE_ADMIN")) {
             return false; // Not being demoted
         }
 
         // Check if this user is currently ADMIN
-        if (!user.getRole().getName().equals("ADMIN")) {
+        if (!(user.getRole().getName().equals("ADMIN") || user.getRole().getName().equals("ROLE_ADMIN"))) {
             return false; // User isn't admin, can't demote non-admin
         }
 
@@ -227,7 +227,7 @@ public class AdminServiceImpl implements AdminService {
     private boolean isOnlyAdmin(User user) {
         long adminCount = userRepository.findAll().stream()
                 .filter(u -> u.isActive())
-                .filter(u -> u.getRole().getName().equals("ADMIN"))
+                .filter(u -> u.getRole().getName().equals("ADMIN") || u.getRole().getName().equals("ROLE_ADMIN"))
                 .count();
 
         return adminCount == 1;

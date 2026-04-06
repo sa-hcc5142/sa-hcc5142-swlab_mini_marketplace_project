@@ -18,8 +18,9 @@
     <div class="grid" style="grid-template-columns: 1.5fr 2.5fr; align-items: start; gap: 20px;">
       <!-- Create Product Form -->
       <section class="card" style="position: sticky; top: 100px;">
-        <h3 style="margin-top:0;">Create New Product</h3>
+        <h3 id="formTitle" style="margin-top:0;">Create New Product</h3>
         <form id="sellerForm" class="form w-full">
+          <input type="hidden" id="productId">
           <input id="name" placeholder="Product name" required>
           <textarea id="description" placeholder="Description" required rows="3"></textarea>
           <div class="flex gap-1" style="margin-bottom:12px;">
@@ -27,7 +28,7 @@
             <input id="stock" type="number" min="0" step="1" placeholder="Stock" style="width:100%" required>
           </div>
           <input id="category" placeholder="Category" style="margin-bottom:12px; width:100%; display:block; padding:10px; border-radius:10px; border:1px solid rgba(15, 23, 42, 0.2);" required>
-          <button class="btn btn-primary w-full" type="submit">Create Product</button>
+          <button id="submitBtn" class="btn btn-primary w-full" type="submit">Create Product</button>
         </form>
       </section>
 

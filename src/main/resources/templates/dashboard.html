@@ -17,13 +17,13 @@
   </section>
 
   <section class="grid">
-    <article class="card">
+    <article class="card" sec:authorize="hasRole('BUYER')">
       <h3>Buyer Area</h3>
       <p>Browse products, maintain cart, and view order history.</p>
       <a class="btn btn-primary" th:href="@{/products/view}">Browse Products</a>
     </article>
 
-    <article class="card" sec:authorize="hasAnyRole('SELLER','ADMIN')">
+    <article class="card" sec:authorize="hasRole('SELLER')">
       <h3>Seller Area</h3>
       <p>Create and manage product catalog entries.</p>
       <a class="btn btn-warning" th:href="@{/seller/dashboard}">Open Seller Dashboard</a>

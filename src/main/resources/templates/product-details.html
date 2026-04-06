@@ -30,7 +30,7 @@
       <div class="flex justify-between items-center" style="margin-top:20px; border-top:1px solid #eee; padding-top:20px;">
         <h2 style="margin:0; color:var(--brand)" id="pdPrice"></h2>
         
-        <div data-required-any="BUYER, ADMIN">
+        <div data-required-any="BUYER">
           <form id="addToCartForm" class="qty-form">
             <input type="number" id="pdQuantity" value="1" min="1">
             <button class="btn btn-primary" type="submit">Add to Cart</button>
@@ -44,7 +44,7 @@
       <h3 style="margin-top:0">Reviews</h3>
       <div id="reviewsList" class="list" style="max-height: 400px; overflow-y:auto; gap: 8px;"></div>
       
-      <div data-required-any="BUYER, ADMIN" style="margin-top:16px; border-top:1px solid #eee; padding-top:16px;">
+      <div data-required-any="BUYER" style="margin-top:16px; border-top:1px solid #eee; padding-top:16px;">
         <h4>Leave a Review</h4>
         <form id="reviewForm" class="form w-full">
           <select id="reviewRating" required>
