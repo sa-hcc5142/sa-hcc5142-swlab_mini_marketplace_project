@@ -136,7 +136,7 @@ erDiagram
 	PRODUCTS {
 		bigint id PK
 		string product_name
-		string description
+        string description
 		double price
 		int stock
 		string category
