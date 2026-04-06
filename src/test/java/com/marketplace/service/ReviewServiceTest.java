@@ -134,6 +134,7 @@ class ReviewServiceTest {
         Order order = new Order();
         order.setId(1L);
         order.setBuyer(buyer);
+        order.setStatus("DELIVERED");
         OrderItem orderItem = new OrderItem();
         orderItem.setProduct(product);
         order.setItems(Arrays.asList(orderItem));
