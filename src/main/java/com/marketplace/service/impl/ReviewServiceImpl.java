@@ -161,7 +161,7 @@ public class ReviewServiceImpl implements ReviewService {
         
         // Check if admin bypass is allowed
         boolean isAdmin = caller.getRoles().stream()
-                .anyMatch(r -> r.getName().equals("ADMIN"));
+                .anyMatch(r -> r.getName().equals("ADMIN") || r.getName().equals("ROLE_ADMIN"));
 
         // Verify buyer is the author or admin
         if (!isAdmin && !review.getBuyer().getId().equals(buyerId)) {
