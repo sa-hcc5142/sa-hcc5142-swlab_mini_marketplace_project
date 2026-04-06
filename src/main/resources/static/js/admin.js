@@ -83,7 +83,7 @@
           const id = e.target.dataset.id;
           const status = document.querySelector(`.status-select[data-id="${id}"]`).value;
           try {
-            await UI.put("/orders/" + id + "/status?status=" + status, {});
+            await UI.request("PATCH", `/orders/${id}/status`, { status });
             UI.toast("Order status updated", "success");
             loadOrders();
           } catch(err) {
