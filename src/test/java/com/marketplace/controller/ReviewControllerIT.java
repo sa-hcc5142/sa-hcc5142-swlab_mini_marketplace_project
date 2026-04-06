@@ -157,7 +157,8 @@ class ReviewControllerIT {
         review.setRating(5);
         review.setComment("Great product!");
         review.setCreatedAt(Instant.now());
-        review = reviewRepository.save(review);
+        // Do NOT save it here globally to avoid Duplicate Review 400 errors in testAddReview_BuyerRole_Success
+        // review = reviewRepository.save(review);
     }
 
     /**
@@ -166,6 +167,7 @@ class ReviewControllerIT {
     @Test
     void testGetProductReviews_Paginated_Success() throws Exception {
         // Act & Assert
+        review = reviewRepository.save(review);
         mockMvc.perform(get("/api/products/" + product.getId() + "/reviews")
                         .param("page", "0")
                         .param("size", "10"))
@@ -179,6 +181,7 @@ class ReviewControllerIT {
     @Test
     void testGetReview_ById_Success() throws Exception {
         // Act & Assert
+        review = reviewRepository.save(review);
         mockMvc.perform(get("/api/products/" + product.getId() + "/reviews/" + review.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id").value(review.getId()));
@@ -211,6 +214,7 @@ class ReviewControllerIT {
     @Test
     void testUpdateReview_UnauthorizedUser_Fails() throws Exception {
         // Arrange
+        review = reviewRepository.save(review);
         ReviewRequest reviewRequest = new ReviewRequest();
         reviewRequest.setRating(3);
         reviewRequest.setComment("Updated");
@@ -230,6 +234,7 @@ class ReviewControllerIT {
     @Test
     void testDeleteReview_OnlyAuthor_Success() throws Exception {
         // Act & Assert
+        review = reviewRepository.save(review);
         mockMvc.perform(delete("/api/products/" + product.getId() + "/reviews/" + review.getId())
                 .with(user(String.valueOf(buyerUser.getId())).roles("BUYER"))
                 .with(csrf()))
@@ -242,6 +247,7 @@ class ReviewControllerIT {
     @Test
     void testDeleteReview_AdminBypass_Success() throws Exception {
         // Act & Assert
+        review = reviewRepository.save(review);
         mockMvc.perform(delete("/api/products/" + product.getId() + "/reviews/" + review.getId())
                 .with(user(String.valueOf(adminUser.getId())).roles("ADMIN"))
                 .with(csrf()))
@@ -254,6 +260,7 @@ class ReviewControllerIT {
     @Test
     void testGetAverageRating_CalculatesCorrectly() throws Exception {
         // Act & Assert
+        review = reviewRepository.save(review);
         mockMvc.perform(get("/api/products/" + product.getId() + "/reviews/rating/average"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").isNumber());
