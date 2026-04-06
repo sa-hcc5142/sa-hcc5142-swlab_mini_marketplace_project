@@ -3,6 +3,7 @@ package com.marketplace.controller;
 import com.marketplace.dto.ApiResponse;
 import com.marketplace.dto.order.OrderRequest;
 import com.marketplace.dto.order.OrderResponse;
+import com.marketplace.dto.order.StatusUpdateRequest;
 import com.marketplace.security.CurrentUserResolver;
 import com.marketplace.service.OrderService;
 import org.springframework.data.domain.Page;
@@ -62,7 +63,34 @@ public class OrderController {
 
         Pageable pageable = PageRequest.of(page, size);
         Page<OrderResponse> ordersPage = orderService.getBuyerOrders(buyerId, pageable);
-
         return ResponseEntity.ok(ApiResponse.success("Orders retrieved successfully", ordersPage));
+    }
+
+    /**
+     * Get all orders globally (ADMIN only)
+     */
+    @GetMapping("/admin")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Page<OrderResponse>>> getAllOrders(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<OrderResponse> ordersPage = orderService.getAllOrders(pageable);
+
+        return ResponseEntity.ok(ApiResponse.success("All orders retrieved successfully", ordersPage));
+    }
+
+    /**
+     * Update order status (ADMIN only)
+     */
+    @PatchMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<OrderResponse>> updateOrderStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody StatusUpdateRequest request) {
+
+        OrderResponse updatedOrder = orderService.updateOrderStatus(id, request.status());
+        return ResponseEntity.ok(ApiResponse.success("Order status updated successfully", updatedOrder));
     }
 }

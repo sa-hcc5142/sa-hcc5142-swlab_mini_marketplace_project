@@ -56,10 +56,10 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse login(LoginRequest request) {
         String email = normalizeEmail(request.email());
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new InvalidCredentialsException("Invalid email or password"));
+                .orElseThrow(() -> new InvalidCredentialsException("User doesn't exist, Register now!"));
 
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-            throw new InvalidCredentialsException("Invalid email or password");
+            throw new InvalidCredentialsException("Invalid password");
         }
 
         return new AuthResponse("Login successful", user.getEmail(), extractRoles(user));

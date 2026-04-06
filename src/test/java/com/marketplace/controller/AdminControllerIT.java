@@ -1,5 +1,8 @@
 package com.marketplace.controller;
 
+import com.marketplace.dto.admin.AdminUpdateUserRequest;
+import com.marketplace.dto.admin.AdminUserRequest;
+import com.marketplace.dto.admin.UpdateRoleRequest;
 import com.marketplace.entity.Role;
 import com.marketplace.entity.User;
 import com.marketplace.repository.RoleRepository;
@@ -203,5 +206,60 @@ class AdminControllerIT {
         mockMvc.perform(get("/api/admin/users")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized());
+    }
+
+    /**
+     * Test Case 8: POST /admin/users - Admin Creates User
+     */
+    @Test
+    @WithMockUser(username = "admin_test_user", roles = {"ADMIN"})
+    void testCreateUser_AdminAccess_Success() throws Exception {
+        AdminUserRequest request = new AdminUserRequest(
+            "New Admin User",
+            "newadmin@marketplace.local",
+            "ADMIN"
+        );
+
+        mockMvc.perform(post("/api/admin/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.fullName", equalTo("New Admin User")))
+                .andExpect(jsonPath("$.data.roles[*]", hasItem("ADMIN")));
+    }
+
+    /**
+     * Test Case 9: PUT /admin/users/{id} - Admin Updates User
+     */
+    @Test
+    @WithMockUser(username = "admin_test_user", roles = {"ADMIN"})
+    void testUpdateUser_AdminAccess_Success() throws Exception {
+        AdminUpdateUserRequest request = new AdminUpdateUserRequest(
+            "Updated Name",
+            "seller_test@marketplace.local",
+            "SELLER",
+            false
+        );
+
+        mockMvc.perform(put("/api/admin/users/" + sellerUser.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.fullName", equalTo("Updated Name")))
+                .andExpect(jsonPath("$.data.active", equalTo(false)));
+    }
+
+    /**
+     * Test Case 10: DELETE /admin/users/{id} - Admin Deletes User
+     */
+    @Test
+    @WithMockUser(username = "admin_test_user", roles = {"ADMIN"})
+    void testDeleteUser_AdminAccess_Success() throws Exception {
+        mockMvc.perform(delete("/api/admin/users/" + buyerUser.getId()))
+                .andExpect(status().isOk());
+
+        // Verify it was actually deleted
+        mockMvc.perform(get("/api/admin/users/" + buyerUser.getId()))
+                .andExpect(status().isNotFound());
     }
 }

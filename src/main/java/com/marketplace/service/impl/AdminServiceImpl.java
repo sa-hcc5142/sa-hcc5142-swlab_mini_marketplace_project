@@ -2,6 +2,8 @@ package com.marketplace.service.impl;
 
 import com.marketplace.dto.admin.AdminUserResponse;
 import com.marketplace.dto.admin.UpdateRoleRequest;
+import com.marketplace.dto.admin.AdminUserRequest;
+import com.marketplace.dto.admin.AdminUpdateUserRequest;
 import com.marketplace.entity.Role;
 import com.marketplace.entity.User;
 import com.marketplace.exception.InvalidOperationException;
@@ -12,6 +14,7 @@ import com.marketplace.service.AdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,6 +34,7 @@ public class AdminServiceImpl implements AdminService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * Get all users with pagination (ADMIN only)
@@ -105,6 +109,76 @@ public class AdminServiceImpl implements AdminService {
 
         user.setActive(false);
         userRepository.save(user);
+    }
+
+    /**
+     * Create a new user (Admin version with random password)
+     */
+    @Override
+    public AdminUserResponse createUser(AdminUserRequest request) {
+        verifyAdminRole();
+
+        if (userRepository.findByEmail(request.email()).isPresent()) {
+            throw new InvalidOperationException("User already exists with email: " + request.email());
+        }
+
+        Role assignedRole = roleRepository.findByName(request.role())
+                .orElseThrow(() -> ResourceNotFoundException.notFound("Role", request.role()));
+
+        User user = new User();
+        user.setFullName(request.fullName());
+        user.setEmail(request.email());
+        user.setUsername(request.email());
+        // Assign a random password as Admin cannot set one
+        user.setPassword(passwordEncoder.encode(java.util.UUID.randomUUID().toString()));
+        user.setRoles(java.util.Collections.singleton(assignedRole));
+        user.setActive(true);
+
+        User saved = userRepository.save(user);
+        return mapToAdminResponse(saved);
+    }
+
+    /**
+     * Update user details (Admin version)
+     */
+    @Override
+    public AdminUserResponse updateUser(Long userId, AdminUpdateUserRequest request) {
+        verifyAdminRole();
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> ResourceNotFoundException.notFound("User", userId));
+
+        Role newRole = roleRepository.findByName(request.role())
+                .orElseThrow(() -> ResourceNotFoundException.notFound("Role", request.role()));
+
+        user.setFullName(request.fullName());
+        user.setEmail(request.email());
+        user.setUsername(request.email());
+        user.setRole(newRole);
+        if (request.active() != null) {
+            user.setActive(request.active());
+        }
+
+        User updated = userRepository.save(user);
+        return mapToAdminResponse(updated);
+    }
+
+    /**
+     * Permanently delete user
+     */
+    @Override
+    public void deleteUser(Long userId) {
+        verifyAdminRole();
+        
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> ResourceNotFoundException.notFound("User", userId));
+
+        // Prevent self-deletion
+        if (user.getUsername().equals(getCurrentUsername())) {
+            throw new InvalidOperationException("Cannot delete your own account");
+        }
+
+        userRepository.delete(user);
     }
 
     // ===== Helper Methods =====

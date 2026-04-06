@@ -38,22 +38,24 @@ public class SecurityConfig {
                     "/products/view/**",
                     "/css/**",
                     "/js/**",
-                    "/error"
+                    "/error",
+                    "/actuator/health"
                 ).permitAll()
-                .requestMatchers("/cart/view", "/orders/view").hasAnyRole("BUYER", "ADMIN")
-                .requestMatchers("/seller/dashboard").hasAnyRole("SELLER", "ADMIN")
+                .requestMatchers("/cart/view", "/orders/view").hasRole("BUYER")
+                .requestMatchers("/seller/dashboard").hasRole("SELLER")
                 .requestMatchers("/admin/dashboard").hasRole("ADMIN")
-                .requestMatchers("/actuator/health").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/products/*/reviews/**").hasAnyRole("BUYER", "ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/products/*/reviews/**").hasAnyRole("BUYER", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/products/*/reviews/**").hasRole("BUYER")
+                .requestMatchers(HttpMethod.PUT, "/api/products/*/reviews/**").hasRole("BUYER")
                 .requestMatchers(HttpMethod.DELETE, "/api/products/*/reviews/**").hasAnyRole("BUYER", "ADMIN")
-                .requestMatchers(HttpMethod.POST, "/api/products/**").hasAnyRole("SELLER", "ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/products/**").hasAnyRole("SELLER", "ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasAnyRole("SELLER", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/products/**").hasRole("SELLER")
+                .requestMatchers(HttpMethod.PUT, "/api/products/**").hasRole("SELLER")
+                .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasRole("SELLER")
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/orders/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/orders/me/**").hasRole("BUYER")
                 .requestMatchers("/api/orders/**").hasAnyRole("BUYER", "ADMIN")
-                .requestMatchers("/api/cart/**").hasAnyRole("BUYER", "ADMIN")
+                .requestMatchers("/api/cart/**").hasRole("BUYER")
                 .anyRequest().authenticated()
                 )
                 .logout(logout -> logout.logoutUrl("/api/auth/logout").permitAll())

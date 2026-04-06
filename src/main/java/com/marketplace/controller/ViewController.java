@@ -1,5 +1,6 @@
 package com.marketplace.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,21 +41,25 @@ public class ViewController {
     }
 
     @GetMapping("/cart/view")
+    @PreAuthorize("hasRole('BUYER')")
     public String cart() {
         return "cart";
     }
 
     @GetMapping("/orders/view")
+    @PreAuthorize("hasRole('BUYER')")
     public String orders() {
         return "orders";
     }
 
     @GetMapping("/seller/dashboard")
+    @PreAuthorize("hasRole('SELLER')")
     public String sellerDashboard() {
         return "seller-dashboard";
     }
 
     @GetMapping("/admin/dashboard")
+    @PreAuthorize("hasRole('ADMIN')")
     public String adminDashboard() {
         return "admin-dashboard";
     }

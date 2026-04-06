@@ -2,10 +2,13 @@ package com.marketplace.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.marketplace.dto.review.ReviewRequest;
+import com.marketplace.entity.Order;
+import com.marketplace.entity.OrderItem;
 import com.marketplace.entity.Product;
 import com.marketplace.entity.Review;
 import com.marketplace.entity.Role;
 import com.marketplace.entity.User;
+import com.marketplace.repository.OrderRepository;
 import com.marketplace.repository.ProductRepository;
 import com.marketplace.repository.ReviewRepository;
 import com.marketplace.repository.RoleRepository;
@@ -54,8 +57,12 @@ class ReviewControllerIT {
     @Autowired
     private ReviewRepository reviewRepository;
 
+    @Autowired
+    private OrderRepository orderRepository;
+
     private User buyerUser;
     private User sellerUser;
+    private User adminUser;
     private Product product;
     private Review review;
 
@@ -100,6 +107,22 @@ class ReviewControllerIT {
         sellerUser.setActive(true);
         sellerUser = userRepository.save(sellerUser);
 
+        Role adminRole = roleRepository.findByName("ADMIN")
+                .orElseGet(() -> {
+                    Role role = new Role();
+                    role.setName("ADMIN");
+                    return roleRepository.save(role);
+                });
+
+        adminUser = new User();
+        adminUser.setUsername("admin");
+        adminUser.setFullName("Admin User");
+        adminUser.setEmail("admin@marketplace.local");
+        adminUser.setPassword("hashed");
+        adminUser.setRole(adminRole);
+        adminUser.setActive(true);
+        adminUser = userRepository.save(adminUser);
+
         // Setup product
         product = new Product();
         product.setProductName("Test Product");
@@ -110,6 +133,23 @@ class ReviewControllerIT {
         product.setSeller(sellerUser);
         product = productRepository.save(product);
 
+        // Setup DELIVERED Order for the buyer (required for review)
+        Order order = new Order();
+        order.setBuyer(buyerUser);
+        order.setStatus("DELIVERED");
+        order.setTotalAmount(BigDecimal.valueOf(99.99));
+        order.setCreatedAt(Instant.now());
+        order.setUpdatedAt(Instant.now());
+        
+        OrderItem item = new OrderItem();
+        item.setOrder(order);
+        item.setProduct(product);
+        item.setQuantity(1);
+        item.setUnitPrice(BigDecimal.valueOf(99.99));
+        item.setSubtotal(BigDecimal.valueOf(99.99));
+        order.getItems().add(item);
+        orderRepository.save(order);
+
         // Setup review
         review = new Review();
         review.setProduct(product);
@@ -117,7 +157,8 @@ class ReviewControllerIT {
         review.setRating(5);
         review.setComment("Great product!");
         review.setCreatedAt(Instant.now());
-        review = reviewRepository.save(review);
+        // Do NOT save it here globally to avoid Duplicate Review 400 errors in testAddReview_BuyerRole_Success
+        // review = reviewRepository.save(review);
     }
 
     /**
@@ -126,6 +167,7 @@ class ReviewControllerIT {
     @Test
     void testGetProductReviews_Paginated_Success() throws Exception {
         // Act & Assert
+        review = reviewRepository.save(review);
         mockMvc.perform(get("/api/products/" + product.getId() + "/reviews")
                         .param("page", "0")
                         .param("size", "10"))
@@ -139,6 +181,7 @@ class ReviewControllerIT {
     @Test
     void testGetReview_ById_Success() throws Exception {
         // Act & Assert
+        review = reviewRepository.save(review);
         mockMvc.perform(get("/api/products/" + product.getId() + "/reviews/" + review.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id").value(review.getId()));
@@ -161,7 +204,8 @@ class ReviewControllerIT {
                 .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(reviewRequest)))
-            .andExpect(status().is4xxClientError());
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.data.comment").value("Good product!"));
     }
 
     /**
@@ -170,6 +214,7 @@ class ReviewControllerIT {
     @Test
     void testUpdateReview_UnauthorizedUser_Fails() throws Exception {
         // Arrange
+        review = reviewRepository.save(review);
         ReviewRequest reviewRequest = new ReviewRequest();
         reviewRequest.setRating(3);
         reviewRequest.setComment("Updated");
@@ -189,8 +234,22 @@ class ReviewControllerIT {
     @Test
     void testDeleteReview_OnlyAuthor_Success() throws Exception {
         // Act & Assert
+        review = reviewRepository.save(review);
         mockMvc.perform(delete("/api/products/" + product.getId() + "/reviews/" + review.getId())
                 .with(user(String.valueOf(buyerUser.getId())).roles("BUYER"))
+                .with(csrf()))
+            .andExpect(status().isOk());
+    }
+
+    /**
+     * Test Case 6: Delete Review - Admin Bypass Success
+     */
+    @Test
+    void testDeleteReview_AdminBypass_Success() throws Exception {
+        // Act & Assert
+        review = reviewRepository.save(review);
+        mockMvc.perform(delete("/api/products/" + product.getId() + "/reviews/" + review.getId())
+                .with(user(String.valueOf(adminUser.getId())).roles("ADMIN"))
                 .with(csrf()))
             .andExpect(status().isOk());
     }
@@ -201,6 +260,7 @@ class ReviewControllerIT {
     @Test
     void testGetAverageRating_CalculatesCorrectly() throws Exception {
         // Act & Assert
+        review = reviewRepository.save(review);
         mockMvc.perform(get("/api/products/" + product.getId() + "/reviews/rating/average"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").isNumber());

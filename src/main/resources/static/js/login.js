@@ -24,7 +24,12 @@
       APP.setAuth({ email: me.email, roles: me.roles || [] });
       window.location.href = "/dashboard";
     } catch (err) {
-      UI.toast("Login failed: " + err.message, "error");
+      if (err.message && err.message.includes("User doesn't exist")) {
+        UI.toast(err.message, "warning");
+        setTimeout(() => window.location.href = "/register", 2000);
+      } else {
+        UI.toast("Login failed: " + err.message, "error");
+      }
     }
   });
 
