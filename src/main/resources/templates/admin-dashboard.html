@@ -16,7 +16,7 @@
       <button id="refreshUsers" class="btn btn-ghost">Refresh Users</button>
     </div>
 
-    <div class="card table-wrapper" style="margin:0; padding:0;">
+    <div class="card table-wrapper" style="margin-bottom:30px; padding:0;">
       <table class="data-table">
         <thead>
           <tr>
@@ -29,6 +29,28 @@
         </thead>
         <tbody id="adminUsersList">
           <tr><td colspan="5" class="text-center text-muted" style="padding:20px;">Click refresh to load users...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="flex justify-between items-center mb-2">
+      <h2 class="section-title" style="margin:0;">Order Management</h2>
+      <button id="refreshOrders" class="btn btn-ghost">Refresh Orders</button>
+    </div>
+
+    <div class="card table-wrapper" style="margin:0; padding:0;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Buyer Email</th>
+            <th>Total Amount</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="adminOrdersList">
+          <tr><td colspan="5" class="text-center text-muted" style="padding:20px;">Click refresh to load orders...</td></tr>
         </tbody>
       </table>
     </div>

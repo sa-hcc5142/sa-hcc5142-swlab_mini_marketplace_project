@@ -18,10 +18,25 @@
           <td>${UI.formatCurrency(p.price)}</td>
           <td>${p.stock}</td>
           <td>
+            <button class="btn btn-ghost edit-prod-btn" style="padding:4px 8px; font-size:12px;" data-id="${p.id}" data-model='${JSON.stringify(p).replace(/'/g, "&#39;")}'>Edit</button>
             <button class="btn btn-ghost del-prod-btn" style="color:var(--danger); border-color:var(--danger); padding:4px 8px; font-size:12px;" data-id="${p.id}">Delete</button>
           </td>
         </tr>
       `).join("");
+
+      document.querySelectorAll(".edit-prod-btn").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          const p = JSON.parse(e.target.dataset.model);
+          UI.byId("productId").value = p.id;
+          UI.byId("name").value = p.productName;
+          UI.byId("description").value = p.description;
+          UI.byId("price").value = p.price;
+          UI.byId("stock").value = p.stock;
+          UI.byId("category").value = p.category;
+          UI.byId("submitBtn").textContent = "Update Product";
+          UI.byId("formTitle").textContent = "Edit Product";
+        });
+      });
 
       document.querySelectorAll(".del-prod-btn").forEach(btn => {
         btn.addEventListener("click", async (e) => {
@@ -43,6 +58,7 @@
   UI.byId("sellerForm")?.addEventListener("submit", async function (e) {
     e.preventDefault();
     try {
+      const pId = UI.byId("productId").value;
       const payload = {
         productName: UI.byId("name").value,
         description: UI.byId("description").value,
@@ -51,12 +67,21 @@
         category: UI.byId("category").value
       };
 
-      await UI.post("/products", payload);
-      UI.toast("Product created successfully!", "success");
+      if (pId) {
+        await UI.put("/products/" + pId, payload);
+        UI.toast("Product updated successfully!", "success");
+      } else {
+        await UI.post("/products", payload);
+        UI.toast("Product created successfully!", "success");
+      }
+      
       UI.byId("sellerForm").reset();
+      UI.byId("productId").value = "";
+      UI.byId("submitBtn").textContent = "Create Product";
+      UI.byId("formTitle").textContent = "Create New Product";
       loadProducts();
     } catch (err) {
-      UI.toast("Creation failed: " + err.message, "error");
+      UI.toast((pId ? "Update" : "Creation") + " failed: " + err.message, "error");
     }
   });
 
